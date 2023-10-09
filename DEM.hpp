@@ -11,20 +11,6 @@
 #include <vector>
 
 
-struct DEMLEVEL {
-    unsigned short int level;   // user determined, based on width & resolution
-    unsigned int resolution;    // distance between 2 DEM values (in metres) i.e. 1 arc second = 30 metres, 15 arc seconds = 450 metres
-    unsigned int width;         // no. of DEM values available in row/column
-    double cellsize;            // distance (in radians) between every DEM values (distance (in radians) b/w DEM bounds / DEM width)
-};
-
-const static DEMLEVEL 
-    L1{1, 450, 3600, 1.0/3600},
-    L2{2, 90, 3600, 1.0/3600},
-    L3{3, 30, 3600, 1.0/3600};  // CartoSAT v3 - INDIA
-
-
-
 struct Coordinate {
     double latitude;
     double longitude;
@@ -119,8 +105,8 @@ private:
         double dem_latitude_index = 0, dem_longitude_index = 0;
 
         if (check_coordinates_bounds(latitude, longitude)) {
-            dem_latitude_index = (std::abs(this->bounds.NW.latitude) - latitude) * (this->dl.width - 1);
-            dem_longitude_index = (longitude - std::abs(this->bounds.SW.longitude)) * (this->dl.width - 1);
+            dem_latitude_index = (std::abs(this->bounds.NW.latitude) - latitude) * (this->type.width - 1);
+            dem_longitude_index = (longitude - std::abs(this->bounds.SW.longitude)) * (this->type.width - 1);
         } else {
             std::ostringstream err; err.precision(8);
             err << "coordinates provided (" << latitude << "," << longitude << ") is out of bounds of currently loaded DEM file (" << (int)this->bounds.SW.latitude << "_" << (int)this->bounds.SW.longitude << ".bin).\n";
@@ -135,16 +121,31 @@ private:
 
 
 public:
+    struct Type {
+        unsigned int resolution;    // distance between 2 DEM values (in metres) i.e. '<x>' arc second(s) = '<resolution>' metres
+        unsigned int width;         // no. of DEM values available in row/column
+        double cellsize;            // distance (in radians) between every DEM values (distance (in radians) b/w DEM bounds / DEM width)
+        
+        Type(): resolution(), width(), cellsize() {};
+
+        Type(unsigned int resolution, unsigned int width, double range) {
+            this->resolution = resolution;
+            this->width = width;
+            this->cellsize = range / this->width;
+        }
+    };
+
+
     std::vector<short int> data;
-    DEMLEVEL dl;
+    Type type;
     Bounds bounds;
 
     
-    DEM(DEMLEVEL dl, const std::string &filepath) {
+    DEM(const Type &type, const std::string &filepath) {
         if (!check_filename(filepath)) std::runtime_error("\nInvalid DEM file name. (file name not of type - '<latitude>_<longitude>.bin')");
         
         Coordinate fb = deduce_filename(filepath);
-        this->dl = dl;
+        this->type = type;
         this->bounds = {
             {fb.latitude+1, fb.longitude},
             {fb.latitude+1, fb.longitude+1},
@@ -165,7 +166,7 @@ public:
         size_t r = static_cast<size_t>(std::round(rc.row));
         size_t c = static_cast<size_t>(std::round(rc.column));
         
-        short int altitude = this->data[r * this->dl.width + c];
+        short int altitude = this->data[r * this->type.width + c];
 
         return altitude;
     }
@@ -177,13 +178,13 @@ public:
         size_t r = static_cast<size_t>(rc.row);
         size_t c = static_cast<size_t>(rc.column);
 
-        double del_latitude = std::min(rc.row, static_cast<double>(this->dl.width-1)) - r;
-        double del_longitude = std::min(rc.column, static_cast<double>(this->dl.width-1)) - c;
+        double del_latitude = std::min(rc.row, static_cast<double>(this->type.width-1)) - r;
+        double del_longitude = std::min(rc.column, static_cast<double>(this->type.width-1)) - c;
 
-        double altitude =   (1-del_latitude) * (1-del_longitude) * this->data[(r * this->dl.width) + c] +
-                            del_longitude * (1-del_latitude) * this->data[r * this->dl.width + (c+1)] +
-                            (1-del_longitude) * del_latitude * this->data[(r == 0 ? 0 : (r-1)) * this->dl.width + c] +
-                            del_latitude * del_longitude * this->data[(r == 0 ? 0 : (r-1)) * this->dl.width + (c+1)];
+        double altitude =   (1-del_latitude) * (1-del_longitude) * this->data[(r * this->type.width) + c] +
+                            del_longitude * (1-del_latitude) * this->data[r * this->type.width + (c+1)] +
+                            (1-del_longitude) * del_latitude * this->data[(r == 0 ? 0 : (r-1)) * this->type.width + c] +
+                            del_latitude * del_longitude * this->data[(r == 0 ? 0 : (r-1)) * this->type.width + (c+1)];
 
         return altitude;
     }
@@ -193,39 +194,39 @@ public:
         Index rc = index(latitude, longitude);
         std::vector<short int> data;
 
-        size_t r = static_cast<size_t>(std::min(rc.row, static_cast<double>(this->dl.width-1)));
-        size_t c = static_cast<size_t>(std::min(rc.column, static_cast<double>(this->dl.width-1)));
+        size_t r = static_cast<size_t>(std::min(rc.row, static_cast<double>(this->type.width-1)));
+        size_t c = static_cast<size_t>(std::min(rc.column, static_cast<double>(this->type.width-1)));
 
         size_t r_start = (r >= radius) ? r - radius : 0;
-        size_t r_end = std::min(r + radius + 1, static_cast<size_t>(this->dl.width));
+        size_t r_end = std::min(r + radius + 1, static_cast<size_t>(this->type.width));
         size_t c_start = (c >= radius) ? c - radius : 0;
-        size_t c_end = std::min(c + radius + 1, static_cast<size_t>(this->dl.width));
+        size_t c_end = std::min(c + radius + 1, static_cast<size_t>(this->type.width));
 
         size_t patch_width = radius * 2;
 
         if (r_start + r_end < patch_width + 1) {
             r_start = 0;
-            r_end = std::min(static_cast<size_t>(this->dl.width), patch_width + 1);
+            r_end = std::min(static_cast<size_t>(this->type.width), patch_width + 1);
         }
 
         if (c_start + c_end < patch_width + 1) {
             c_start = 0;
-            c_end = std::min(static_cast<size_t>(this->dl.width), patch_width + 1);
+            c_end = std::min(static_cast<size_t>(this->type.width), patch_width + 1);
         }
 
-        if (r + radius >= this->dl.width) {
-            r_start = std::max<size_t>(this->dl.width - patch_width - 1, 0);
-            r_end = this->dl.width;
+        if (r + radius >= this->type.width) {
+            r_start = std::max<size_t>(this->type.width - patch_width - 1, 0);
+            r_end = this->type.width;
         }
 
-        if (c + radius >= this->dl.width) {
-            c_start = std::max<size_t>(this->dl.width - patch_width - 1, 0);
-            c_end = this->dl.width;
+        if (c + radius >= this->type.width) {
+            c_start = std::max<size_t>(this->type.width - patch_width - 1, 0);
+            c_end = this->type.width;
         }
 
         for (int i = r_start; i < r_end; i++)
             for (int j = c_start; j < c_end; j++)
-                data.push_back(this->data[i * this->dl.width + j]);
+                data.push_back(this->data[i * this->type.width + j]);
 
         return data;
     }
@@ -258,7 +259,7 @@ public:
     }
 
 
-    static void create_dem_asc_csv(const std::string& path, DEMLEVEL dl) {
+    static void create_dem_asc_csv(const std::string& path, Type type) {
         std::vector<short int> dem_data;
         short int value = 0;
         
@@ -280,8 +281,8 @@ public:
 
         // write as per '.csv' format
         std::ofstream ofp(ofp_path);
-        for (int i = 0; i < dl.width * dl.width; ++i) {
-            if (i % dl.width == dl.width - 1)
+        for (int i = 0; i < type.width * type.width; ++i) {
+            if (i % type.width == type.width - 1)
                 ofp << dem_data[i] << "\n";
             else
                 ofp << dem_data[i] << ",";
@@ -317,7 +318,7 @@ public:
     }
 
 
-    static void create_dem_bin_csv(const std::string& path, DEMLEVEL dl) {
+    static void create_dem_bin_csv(const std::string& path, Type type) {
         std::vector<short int> dem_data;
         short int value = 0;
 
@@ -333,8 +334,8 @@ public:
 
         // write as per '.csv' format
         std::ofstream ofp(ofp_path);
-        for (int i = 0; i < dl.width*dl.width; ++i) {
-            if (i % dl.width == dl.width - 1)
+        for (int i = 0; i < type.width*type.width; ++i) {
+            if (i % type.width == type.width - 1)
                 ofp << dem_data[i] << "\n";
             else
                 ofp << dem_data[i] << ",";
