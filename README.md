@@ -31,3 +31,24 @@ the bottom-left coordinates (`SW(14,76)`) should be used as file name - `14_76.a
         return 0;
     }
     ```
+
+
+## Reading DEM data
+
+1. The different parameters of the downloaded DEM data should be known :
+    - Resolution - distance covered by 1 DEM value _(e.g. 30 metres)_
+    - Width - number of rows and columns present in the DEM data _(e.g. 3600)_
+    - Range - the distance covered by the DEM data (in degree) _(e.g. 1.0 degree)_
+
+2. File path to the created DEM data binary file _(e.g. `"/home/user/DEM/14_76.bin"`)_
+
+```cpp
+#include "DEM.hpp"
+
+int main() {
+    DEM::Type type = DEM::Type(30, 3600, 1); // resolution, width, range
+    DEM dem = DEM(type, "/home/user/DEM/14_76.bin"); // initialise DEM
+
+    return 0;
+}
+```
