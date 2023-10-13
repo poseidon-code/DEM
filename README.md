@@ -52,3 +52,31 @@ int main() {
     return 0;
 }
 ```
+
+
+## Operations
+
+1. **Altitude** : returns the DEM height of the given coordinate as it is in DEM data
+    ```cpp
+    double Latitude = 14.6705686, Longitude = 76.5106390;
+
+    short int altitude = dem.altitude(Latitude, Longitude);
+    std::cout << "Height :" << altitude << std::endl;
+    ```
+
+2. **Interpolated Altitude** : returns the interpolated DEM height of the given coordinate
+    ```cpp
+    double Latitude = 14.6705686, Longitude = 76.5106390;
+
+    double interpolated_altitude = dem.interpolated_altitude(Latitude, Longitude);
+    std::cout << "Interpolated Height : " << interpolated_altitude << std::endl;
+    ```
+
+3. **Patch** : returns an 1D vector of the surrounding DEM data of a valid coordinate.
+
+    ```cpp
+    double Latitude = 14.6705686, Longitude = 76.5106390;
+    unsigned int radius = 10;
+
+    std::vector<short int> patch = dem.patch(Latitude, Longitude, radius);
+    ```
