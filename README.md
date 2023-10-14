@@ -80,3 +80,32 @@ int main() {
 
     std::vector<short int> patch = dem.patch(Latitude, Longitude, radius);
     ```
+
+
+## File Conversion Operations
+
+These functions converts files to the following formats and saves them in the same directory as that of the input files :
+- `.asc` _(text file representation of DEM generated from a GIS application)_
+- `.bin` _(file containing DEM data represented in binary format)_
+- `.csv` _(comma seperated text file representation of the DEM data for usage with spreadsheets)_
+
+
+1. **`.asc` to `.bin`** : converts `.asc` _(text)_ file to `.bin` _(binary)_ file
+    ```cpp
+    DEM::create_dem_asc_bin("./14_76.asc");
+    ```
+
+2. **`.asc` to `.csv`** : converts `.asc` _(text)_ file to `.csv` _(comma seperated values)_ file
+    ```cpp
+    DEM::create_dem_asc_csv("./14_76.asc", type);
+    ```
+
+3. **`.bin` to `.csv`** : converts `.bin` _(binary)_ file to `.csv` _(comma seperated values)_ file
+    ```cpp
+    DEM::create_dem_bin_csv("./14_76.bin", type);
+    ```
+
+4. **`.csv` to `.bin`** : converts `.csv` _(comma seperated values)_ file to `.bin` _(binary)_ file
+    ```cpp
+    DEM::create_dem_csv_bin("./14_76.csv");
+    ```
