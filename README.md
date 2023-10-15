@@ -109,3 +109,29 @@ These functions converts files to the following formats and saves them in the sa
     ```cpp
     DEM::create_dem_csv_bin("./14_76.csv");
     ```
+
+
+## Usage
+
+```cpp
+// main.cpp
+#include "DEM.hpp"
+
+int main() {
+    DEM::Type type = DEM::Type(30, 3600, 1); // resolution, width, range
+    DEM dem = DEM(type, "/home/user/DEM/14_76.bin"); // initialise DEM
+
+    return 0;
+}
+```
+
+1. Use `DEM.hpp` as a single header-only file to include in your projects.
+    ```sh
+    g++ ./main.cpp -I./path/to/DEM -o main
+    ```
+
+2. Use seperate header file `include/DEM.hpp` and source file `src/DEM.cpp`
+    ```sh
+    g++ ./main.cpp ./path/to/DEM/src/DEM.cpp -I./path/to/DEM/include -o main
+    ```
+
