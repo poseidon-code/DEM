@@ -135,3 +135,16 @@ int main() {
     g++ ./main.cpp ./path/to/DEM/src/DEM.cpp -I./path/to/DEM/include -o main
     ```
 
+
+## Building
+
+Use `CMake` **_(required)_** to build both shared and static libraries of DEM.\
+Open a terminal inside DEM project directory and paste the following commands.
+
+```sh
+mkdir build
+cd build
+cmake ..
+cmake --build .
+```
+
