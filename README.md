@@ -148,3 +148,8 @@ cmake ..
 cmake --build .
 ```
 
+
+# [License](./LICENSE)
+
+MIT License\
+Copyright &copy; 2023 Pritam Halder
