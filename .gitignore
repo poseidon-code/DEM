@@ -7,4 +7,3 @@ Makefile
 .cmake
 
 .vscode/
-*.csv
