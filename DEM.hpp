@@ -75,7 +75,7 @@ private:
     }
 
 
-    bool check_filename(const std::string& filepath) {
+    bool check_filename(const std::string &filepath) {
         size_t found = filepath.find_last_of("/\\");
         std::string filename;
 
@@ -232,7 +232,7 @@ public:
     }
     
     
-    static void create_dem_asc_bin(const std::string& path) {
+    static void create_dem_asc_bin(const std::string &path) {
         std::vector<short int> dem_data;
         short int value = 0;
         
@@ -259,7 +259,7 @@ public:
     }
 
 
-    static void create_dem_asc_csv(const std::string& path, Type type) {
+    static void create_dem_asc_csv(const std::string &path, Type type) {
         std::vector<short int> dem_data;
         short int value = 0;
         
@@ -291,7 +291,7 @@ public:
     }
 
 
-    static void create_dem_csv_bin(const std::string& path) {
+    static void create_dem_csv_bin(const std::string &path) {
         std::vector<short int> dem_data;
         short int value = 0;
 
@@ -318,7 +318,7 @@ public:
     }
 
 
-    static void create_dem_bin_csv(const std::string& path, Type type) {
+    static void create_dem_bin_csv(const std::string &path, Type type) {
         std::vector<short int> dem_data;
         short int value = 0;
 
