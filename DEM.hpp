@@ -190,9 +190,10 @@ public:
     }
 
 
-    std::vector<short int> patch(double latitude, double longitude, int radius) {
+    std::vector<short int> patch(double latitude, double longitude, unsigned int radius) {
         Index rc = index(latitude, longitude);
         std::vector<short int> data;
+        radius = static_cast<int>(radius);
 
         size_t r = static_cast<size_t>(std::min(rc.row, static_cast<double>(this->type.width-1)));
         size_t c = static_cast<size_t>(std::min(rc.column, static_cast<double>(this->type.width-1)));
