@@ -5,21 +5,6 @@
 #include <vector>
 
 
-
-struct DEMLEVEL {
-    unsigned short int level;   // user determined, based on width & resolution
-    unsigned int resolution;    // distance between 2 DEM values (in metres) i.e. 1 arc second = 30 metres, 15 arc seconds = 450 metres
-    unsigned int width;         // no. of DEM values available in row/column
-    double cellsize;            // distance (in radians) between every DEM values
-};
-
-const static DEMLEVEL 
-    L1{1, 450, 3600, 1.0/3600},
-    L2{2, 90, 3600, 1.0/3600},
-    L3{3, 30, 3600, 1.0/3600};
-
-
-
 struct Coordinate {
     double latitude;
     double longitude;
@@ -40,28 +25,41 @@ private:
         double column;
     };
 
-
     int read(const std::string &filepath);
-    Coordinate deduce_filename(const std::string& filepath);
-    bool check_filename(const std::string& filepath);
+    Coordinate deduce_filename(const std::string &filepath);
+    bool check_filename(const std::string &filepath);
     bool check_coordinates_bounds(double latitude, double longitude);
     Index index(double latitude, double longitude);
 
+
 public:
+    struct Type {
+        unsigned int resolution;    // distance between 2 DEM values (in metres) i.e. '<x>' arc second(s) = '<resolution>' metres
+        unsigned int width;         // no. of DEM values available in row/column
+        double cellsize;            // distance (in radians) between every DEM values (distance (in radians) b/w DEM bounds / DEM width)
+        
+        Type(): resolution(), width(), cellsize() {};
+
+        Type(unsigned int resolution, unsigned int width, double range) {
+            this->resolution = resolution;
+            this->width = width;
+            this->cellsize = range / this->width;
+        }
+    };
+
     std::vector<short int> data;
-    DEMLEVEL dl;
+    Type type;
     Bounds bounds;
 
-    DEM(DEMLEVEL dl, const std::string &filepath);
+    DEM(const Type &type, const std::string &filepath);
     ~DEM() = default;
 
     short int altitude(double latitude, double longitude);
     double interpolated_altitude(double latitude, double longitude);
-    std::vector<short int> patch(double latitude, double longitude, int radius);
-    
+    std::vector<short int> patch(double latitude, double longitude, unsigned int radius);
     
     static void create_dem_asc_bin(const std::string &path);
-    static void create_dem_asc_csv(const std::string &path, DEMLEVEL dl);
-    static void create_dem_bin_csv(const std::string &path, DEMLEVEL dl);
+    static void create_dem_asc_csv(const std::string &path, Type type);
     static void create_dem_csv_bin(const std::string &path);
+    static void create_dem_bin_csv(const std::string &path, Type type);
 };
