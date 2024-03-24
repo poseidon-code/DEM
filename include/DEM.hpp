@@ -22,6 +22,20 @@ public:
     struct Coordinate {
         double latitude;
         double longitude;
+
+        Coordinate() {
+            this->latitude = 0;
+            this->longitude = 0;
+        };
+
+        Coordinate(double latitude, double longitude) {
+            if (latitude > 90 || latitude < -90 || longitude > 180 || longitude < -180) {
+                std::string e = "invalid coordinates (" + std::to_string(latitude) +  ":" +  std::to_string(longitude) + ")";
+                throw std::runtime_error(e);
+            }
+            this->latitude = latitude;
+            this->longitude = longitude;
+        };
     };
 
     struct Bounds {
