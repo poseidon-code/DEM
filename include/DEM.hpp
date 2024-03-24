@@ -64,7 +64,7 @@ public:
     short int altitude(double latitude, double longitude);
     double interpolated_altitude(double latitude, double longitude);
     std::vector<std::vector<short int>> patch(double latitude, double longitude, unsigned int radius);
-    
+
     static void create_dem_asc_bin(const std::string& path);
     static void create_dem_asc_csv(const std::string& path, Type type);
     static void create_dem_csv_bin(const std::string& path);

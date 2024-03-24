@@ -29,9 +29,9 @@ int DEM::read(const std::string& filepath) {
 
 bool DEM::check_coordinates_bounds(double latitude, double longitude) {
     if (
-        latitude >= this->bounds.SW.latitude 
+        latitude >= this->bounds.SW.latitude
         && latitude < this->bounds.NE.latitude
-        && longitude >= this->bounds.SW.longitude 
+        && longitude >= this->bounds.SW.longitude
         && longitude < this->bounds.NE.longitude
     )
         return true;
