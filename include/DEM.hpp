@@ -52,6 +52,28 @@ public:
         double xllcorner;           // bottom left longitude
         double cellsize;            // distance (in radians) between every DEM values
         short int nodata;           // invalid DEM value representation
+
+        Type() {
+            this->nrows = 0;
+            this->ncols = 0;
+            this->yllcorner = 0;
+            this->xllcorner = 0;
+            this->cellsize = 0;
+            this->nodata = 0;
+        };
+
+        Type (unsigned int nrows, unsigned int ncols, double yllcorner, double xllcorner, double cellsize, short int nodata) {
+            if (yllcorner > 90 || yllcorner < -90 || xllcorner > 180 || xllcorner < -180) {
+                std::string e = "invalid coordinates (" + std::to_string(yllcorner) +  ":" +  std::to_string(xllcorner) + ")";
+                throw std::runtime_error(e);
+            }
+            this->nrows = nrows;
+            this->ncols = ncols;
+            this->yllcorner = yllcorner;
+            this->xllcorner = xllcorner;
+            this->cellsize = cellsize;
+            this->nodata = nodata;
+        };
     };
 
     std::vector<short int> data;
