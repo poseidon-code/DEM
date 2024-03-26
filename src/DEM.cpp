@@ -11,12 +11,22 @@
 
 int DEM::read(const std::string& filepath) {
     std::ifstream fp = std::ifstream(filepath, std::ios::binary | std::ios::in);
-
     short int t_value;
 
     if (fp.good() && !fp.eof()) {
-        while (fp.read(reinterpret_cast<char*>(&t_value), sizeof(short int)))
-            data.push_back(t_value);
+        int column_count = 0;
+        std::vector<short int> row_data(this->type.nrows, 0);
+
+        while (fp.read(reinterpret_cast<char*>(&t_value), sizeof(short int))) {
+            if (column_count == this->type.ncols) {
+                this->data.push_back(row_data);
+                column_count = 0;
+                row_data.clear();
+            }
+
+            row_data.push_back(t_value);
+            column_count++;
+        }
     } else {
         fp.close();
         return EXIT_FAILURE;
@@ -84,7 +94,7 @@ short int DEM::altitude(double latitude, double longitude) {
     size_t r = static_cast<size_t>(std::round(rc.row));
     size_t c = static_cast<size_t>(std::round(rc.column));
 
-    short int altitude = this->data[(this->type.nrows - r) * this->type.ncols + c];
+    short int altitude = this->data[(this->type.nrows - r)][c];
 
     return altitude;
 }
@@ -103,10 +113,10 @@ double DEM::interpolated_altitude(double latitude, double longitude) {
     double del_latitude = std::min(rc.row, static_cast<double>(this->type.nrows-1)) - r;
     double del_longitude = std::min(rc.column, static_cast<double>(this->type.ncols-1)) - c;
 
-    double altitude =   (1-del_latitude) * (1-del_longitude) * this->data[((this->type.nrows - r) * this->type.ncols) + c] +
-                        del_longitude * (1-del_latitude) * this->data[(this->type.nrows - r) * this->type.ncols + (c + 1)] +
-                        (1-del_longitude) * del_latitude * this->data[(this->type.nrows - r + 1 ) * this->type.ncols + c] +
-                        del_latitude * del_longitude * this->data[(this->type.nrows - r + 1) * this->type.ncols + (c + 1)];
+    double altitude =   (1-del_latitude) * (1-del_longitude) * this->data[this->type.nrows - r][c] +
+                        del_longitude * (1-del_latitude) * this->data[this->type.nrows - r][c + 1] +
+                        (1-del_longitude) * del_latitude * this->data[this->type.nrows - r + 1][c] +
+                        del_latitude * del_longitude * this->data[this->type.nrows - r + 1][c + 1];
 
     return altitude;
 }
@@ -154,7 +164,7 @@ std::vector<std::vector<short int>> DEM::patch(double latitude, double longitude
     for (int i = r_start; i < r_end; i++) {
         std::vector<short int> dem_patch_row;
         for (int j = c_start; j < c_end; j++) {
-            dem_patch_row.push_back(this->data[i * this->type.ncols + j]);
+            dem_patch_row.push_back(this->data[i][j]);
         }
         dem_patch.push_back(dem_patch_row);
     }

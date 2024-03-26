@@ -76,7 +76,7 @@ public:
         };
     };
 
-    std::vector<short int> data;
+    std::vector<std::vector<short int>> data;
     Type type;
     Bounds bounds;
 
