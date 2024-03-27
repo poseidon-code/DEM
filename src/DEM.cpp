@@ -54,8 +54,21 @@ DEM::Index DEM::index(double latitude, double longitude) {
     double dem_latitude_index = 0, dem_longitude_index = 0;
 
     if (check_coordinates_bounds(latitude, longitude)) {
-        dem_latitude_index = (latitude - this->bounds.SW.latitude) / this->type.cellsize;
-        dem_longitude_index = (longitude - this->bounds.SW.longitude) / this->type.cellsize;
+        if (latitude >= this->bounds.SW.latitude) {
+            // Northern Hemisphere
+            dem_latitude_index = (this->bounds.NE.latitude - latitude) / this->type.cellsize;
+        } else {
+            // Southern Hemisphere
+            dem_latitude_index = (latitude - this->bounds.SW.latitude) / this->type.cellsize;
+        }
+
+        if (longitude >= this->bounds.SW.longitude) {
+            // Eastern Hemisphere
+            dem_longitude_index = (longitude - this->bounds.SW.longitude) / this->type.cellsize;
+        } else {
+            // Western Hemisphere
+            dem_longitude_index = (this->bounds.NE.longitude - longitude) / this->type.cellsize;
+        }
     } else {
         return {
             static_cast<double>(this->type.nodata),
@@ -94,7 +107,7 @@ short int DEM::altitude(double latitude, double longitude) {
     size_t r = static_cast<size_t>(std::round(rc.row));
     size_t c = static_cast<size_t>(std::round(rc.column));
 
-    short int altitude = this->data[(this->type.nrows - r)][c];
+    short int altitude = this->data[r][c];
 
     return altitude;
 }
@@ -113,10 +126,10 @@ double DEM::interpolated_altitude(double latitude, double longitude) {
     double del_latitude = std::min(rc.row, static_cast<double>(this->type.nrows-1)) - r;
     double del_longitude = std::min(rc.column, static_cast<double>(this->type.ncols-1)) - c;
 
-    double altitude =   (1-del_latitude) * (1-del_longitude) * this->data[this->type.nrows - r][c] +
-                        del_longitude * (1-del_latitude) * this->data[this->type.nrows - r][c + 1] +
-                        (1-del_longitude) * del_latitude * this->data[this->type.nrows - r + 1][c] +
-                        del_latitude * del_longitude * this->data[this->type.nrows - r + 1][c + 1];
+    double altitude =   (1-del_latitude) * (1-del_longitude) * this->data[r][c] +
+                        del_longitude * (1-del_latitude) * this->data[r][c + 1] +
+                        (1-del_longitude) * del_latitude * this->data[r + 1][c] +
+                        del_latitude * del_longitude * this->data[r + 1][c + 1];
 
     return altitude;
 }
@@ -134,8 +147,8 @@ std::vector<std::vector<short int>> DEM::patch(double latitude, double longitude
     size_t r = static_cast<size_t>(std::min(rc.row, static_cast<double>(this->type.nrows-1)));
     size_t c = static_cast<size_t>(std::min(rc.column, static_cast<double>(this->type.ncols-1)));
 
-    size_t r_start = (r >= radius) ? this->type.nrows - r - radius : 0;
-    size_t r_end = std::min(this->type.nrows - r + radius + 1, static_cast<size_t>(this->type.nrows));
+    size_t r_start = (r >= radius) ? r - radius : 0;
+    size_t r_end = std::min(r + radius + 1, static_cast<size_t>(this->type.nrows));
     size_t c_start = (c >= radius) ? c - radius : 0;
     size_t c_end = std::min(c + radius + 1, static_cast<size_t>(this->type.ncols));
 
@@ -163,9 +176,8 @@ std::vector<std::vector<short int>> DEM::patch(double latitude, double longitude
 
     for (int i = r_start; i < r_end; i++) {
         std::vector<short int> dem_patch_row;
-        for (int j = c_start; j < c_end; j++) {
+        for (int j = c_start; j < c_end; j++)
             dem_patch_row.push_back(this->data[i][j]);
-        }
         dem_patch.push_back(dem_patch_row);
     }
 
