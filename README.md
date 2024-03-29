@@ -34,7 +34,7 @@ from provided latitude & longitude using the DEM data of the particular area.
     - Columns - _number of columns in DEM data_
     - Lower Left Corner Latitude - _bottom left latitude of the DEM data_
     - Lower Left Corner Longitude - _bottom left longitude of the DEM data_
-    - Cellsize - _distance (in radians) between every DEM values_
+    - Cell Size - _distance (in radians) between every DEM values_
     - No Data Value - _invalid DEM value representation_
 
 2. File path to the created DEM data binary file _(e.g. `"/home/user/DEM/14_76.bin"`)_
@@ -43,7 +43,7 @@ from provided latitude & longitude using the DEM data of the particular area.
     #include "DEM.hpp"
 
     int main() {
-        DEM::Type type = DEM::Type(3600, 3600, 14, 76, 0.000277777, INI16_MIN); // nrows, ncols, yllcorner, xllcorner, cellsize, nodata
+        DEM::Type type = DEM::Type(3600, 3600, 14, 76, 0.000277777, INT16_MIN); // nrows, ncols, yllcorner, xllcorner, cellsize, nodata
         DEM dem = DEM(type, "/home/user/DEM/14_76.bin"); // initialise
 
         return 0;
@@ -117,7 +117,7 @@ These functions converts files to the following formats and saves them in the sa
 #include "DEM.hpp"
 
 int main() {
-    DEM::Type type = DEM::Type(3600, 3600, 14, 76, 0.000277777, INI16_MIN); // nrows, ncols, yllcorner, xllcorner, cellsize, nodata
+    DEM::Type type = DEM::Type(3600, 3600, 14, 76, 0.000277777, INT16_MIN); // nrows, ncols, yllcorner, xllcorner, cellsize, nodata
     DEM dem = DEM(type, "/home/user/DEM/14_76.bin"); // initialise
 
     return 0;
