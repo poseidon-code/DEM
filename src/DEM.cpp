@@ -37,19 +37,6 @@ int DEM::read(const std::string& filepath) {
 }
 
 
-bool DEM::check_coordinates_bounds(double latitude, double longitude) {
-    if (
-        latitude >= this->bounds.SW.latitude
-        && latitude < this->bounds.NE.latitude
-        && longitude >= this->bounds.SW.longitude
-        && longitude < this->bounds.NE.longitude
-    )
-        return true;
-    else
-        return false;
-}
-
-
 DEM::Index DEM::index(double latitude, double longitude) {
     double dem_latitude_index = 0, dem_longitude_index = 0;
 
@@ -94,6 +81,19 @@ DEM::DEM(const Type& type, const std::string& filepath) {
 
     // read the DEM file (sets: this->data)
     if (read(filepath) != 0) std::runtime_error("\nfailed to read DEM file");
+}
+
+
+bool DEM::check_coordinates_bounds(double latitude, double longitude) {
+    if (
+        latitude >= this->bounds.SW.latitude
+        && latitude < this->bounds.NE.latitude
+        && longitude >= this->bounds.SW.longitude
+        && longitude < this->bounds.NE.longitude
+    )
+        return true;
+    else
+        return false;
 }
 
 

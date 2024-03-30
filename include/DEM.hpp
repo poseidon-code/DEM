@@ -14,7 +14,6 @@ private:
     };
 
     int read(const std::string& filepath);
-    bool check_coordinates_bounds(double latitude, double longitude);
     Index index(double latitude, double longitude);
 
 
@@ -83,6 +82,7 @@ public:
     DEM(const Type& type, const std::string& filepath);
     ~DEM() = default;
 
+    bool check_coordinates_bounds(double latitude, double longitude);
     short int altitude(double latitude, double longitude);
     double interpolated_altitude(double latitude, double longitude);
     std::vector<std::vector<short int>> patch(double latitude, double longitude, unsigned int radius);
