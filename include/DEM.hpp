@@ -80,7 +80,7 @@ public:
     Bounds bounds;
 
     DEM(const Type& type, const std::string& filepath);
-    ~DEM() = default;
+    ~DEM();
 
     bool check_coordinates_bounds(double latitude, double longitude);
     short int altitude(double latitude, double longitude);

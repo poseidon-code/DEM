@@ -84,6 +84,11 @@ DEM::DEM(const Type& type, const std::string& filepath) {
 }
 
 
+DEM::~DEM() {
+    this->data.clear();
+}
+
+
 bool DEM::check_coordinates_bounds(double latitude, double longitude) {
     if (
         latitude >= this->bounds.SW.latitude
