@@ -35,6 +35,17 @@ public:
             this->latitude = latitude;
             this->longitude = longitude;
         };
+
+        bool operator<(const Coordinate& other) const {
+            if (latitude == other.latitude) {
+                return longitude < other.longitude;
+            }
+            return latitude < other.latitude;
+        }
+
+        bool operator==(const Coordinate& other) const {
+            return latitude == other.latitude && longitude == other.longitude;
+        }
     };
 
     struct Bounds {
