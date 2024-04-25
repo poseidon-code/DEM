@@ -140,56 +140,6 @@ double DEM::interpolated_altitude(double latitude, double longitude) {
 }
 
 
-std::vector<std::vector<short int>> DEM::patch(double latitude, double longitude, unsigned int radius) {
-    Index rc = index(latitude, longitude);
-    if (rc.row == this->type.nodata || rc.column == this->type.nodata) {
-        return {};
-    }
-
-    std::vector<std::vector<short int>> dem_patch;
-    radius = static_cast<int>(radius);
-
-    size_t r = static_cast<size_t>(std::min(rc.row, static_cast<double>(this->type.nrows-1)));
-    size_t c = static_cast<size_t>(std::min(rc.column, static_cast<double>(this->type.ncols-1)));
-
-    size_t r_start = (r >= radius) ? r - radius : 0;
-    size_t r_end = std::min(r + radius + 1, static_cast<size_t>(this->type.nrows));
-    size_t c_start = (c >= radius) ? c - radius : 0;
-    size_t c_end = std::min(c + radius + 1, static_cast<size_t>(this->type.ncols));
-
-    size_t patch_width = radius * 2;
-
-    if (r_start + r_end < patch_width + 1) {
-        r_start = 0;
-        r_end = std::min(static_cast<size_t>(this->type.nrows), patch_width + 1);
-    }
-
-    if (c_start + c_end < patch_width + 1) {
-        c_start = 0;
-        c_end = std::min(static_cast<size_t>(this->type.ncols), patch_width + 1);
-    }
-
-    if (r + radius >= this->type.nrows) {
-        r_start = std::max<size_t>(this->type.nrows - patch_width - 1, 0);
-        r_end = this->type.nrows;
-    }
-
-    if (c + radius >= this->type.ncols) {
-        c_start = std::max<size_t>(this->type.ncols - patch_width - 1, 0);
-        c_end = this->type.ncols;
-    }
-
-    for (int i = r_start; i < r_end; i++) {
-        std::vector<short int> dem_patch_row;
-        for (int j = c_start; j < c_end; j++)
-            dem_patch_row.push_back(this->data[i][j]);
-        dem_patch.push_back(dem_patch_row);
-    }
-
-    return dem_patch;
-}
-
-
 void DEM::create_dem_asc_bin(const std::string& path) {
     std::vector<short int> dem_data;
     short int value = 0;
