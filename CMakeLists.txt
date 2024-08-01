@@ -8,7 +8,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
 # libDEM
-set(LIBDEM_SOURCES src/DEM.cpp)
+set(LIBDEM_SOURCES src/DEM.cpp src/Map.cpp)
 set(LIBDEM_INCLUDE_DIRECTORY include)
 
 
@@ -19,6 +19,7 @@ set_target_properties(
     "${PROJECT_NAME}_static"
     PROPERTIES
     OUTPUT_NAME ${PROJECT_NAME}
+    POSITION_INDEPENDENT_CODE ON
 )
 
 
@@ -29,4 +30,5 @@ set_target_properties(
     "${PROJECT_NAME}_shared"
     PROPERTIES
     OUTPUT_NAME ${PROJECT_NAME}
+    POSITION_INDEPENDENT_CODE ON
 )
