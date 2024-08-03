@@ -15,17 +15,17 @@ int DEM::read(const std::string& filepath) {
 
     if (fp.good() && !fp.eof()) {
         int column_count = 0;
-        std::vector<short int> row_data(this->type.nrows, 0);
+        std::vector<short int> row_data;
 
         while (fp.read(reinterpret_cast<char*>(&t_value), sizeof(short int))) {
+            row_data.push_back(t_value);
+            column_count++;
+
             if (column_count == this->type.ncols) {
                 this->data.push_back(row_data);
                 column_count = 0;
                 row_data.clear();
             }
-
-            row_data.push_back(t_value);
-            column_count++;
         }
     } else {
         fp.close();

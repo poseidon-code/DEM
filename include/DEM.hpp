@@ -90,6 +90,7 @@ public:
     Type type;
     Bounds bounds;
 
+    DEM() = default;
     DEM(const Type& type, const std::string& filepath);
     ~DEM();
 
