@@ -131,10 +131,13 @@ double DEM::interpolated_altitude(double latitude, double longitude) {
     double del_latitude = std::min(rc.row, static_cast<double>(this->type.nrows-1)) - r;
     double del_longitude = std::min(rc.column, static_cast<double>(this->type.ncols-1)) - c;
 
+    size_t next_r = (r == this->type.nrows-1) ? r : r + 1;
+    size_t next_c = (c == this->type.ncols-1) ? c : c + 1;
+
     double altitude =   (1-del_latitude) * (1-del_longitude) * this->data[r][c] +
-                        del_longitude * (1-del_latitude) * this->data[r][c + 1] +
-                        (1-del_longitude) * del_latitude * this->data[r + 1][c] +
-                        del_latitude * del_longitude * this->data[r + 1][c + 1];
+                        del_longitude * (1-del_latitude) * this->data[r][next_c] +
+                        (1-del_longitude) * del_latitude * this->data[next_r][c] +
+                        del_latitude * del_longitude * this->data[next_r][next_c];
 
     return altitude;
 }
