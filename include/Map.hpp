@@ -1,7 +1,6 @@
 #pragma once
 
 #include <map>
-#include <memory>
 #include <string>
 
 #include "DEM.hpp"
@@ -21,7 +20,7 @@ public:
     static Type InitializeDEMMap(std::string dem_directory_path);
 
 private:
-    std::unique_ptr<DEM> dem;
+    DEM dem;
     Type map;
 
     bool load(double latitude, double longitude);

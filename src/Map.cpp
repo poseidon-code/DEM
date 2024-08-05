@@ -1,10 +1,10 @@
 #include <cmath>
 #include <filesystem>
-#include <memory>
 #include <regex>
 #include <string>
 #include <system_error>
 
+#include "DEM.hpp"
 #include "Map.hpp"
 
 
@@ -25,7 +25,7 @@ Map::Map(const Type& map) {
     this->map = map;
 
     auto first_dem = this->map.cbegin();
-    this->dem = std::make_unique<DEM>(this->map[first_dem->first].first, this->map[first_dem->first].second);
+    this->dem = DEM(this->map[first_dem->first].first, this->map[first_dem->first].second);
 }
 
 
@@ -36,33 +36,31 @@ bool Map::load(double latitude, double longitude) {
     };
 
     if (this->map.count(map_coordinate) == 0) return false;
-
-    this->dem.reset();
-    this->dem = std::make_unique<DEM>(this->map[map_coordinate].first, this->map[map_coordinate].second);
+    this->dem = DEM(this->map[map_coordinate].first, this->map[map_coordinate].second);
 
     return true;
 }
 
 
 short int Map::altitude(double latitude, double longitude) {
-    if (!this->dem->check_coordinates_bounds(latitude, longitude)) {
+    if (!this->dem.check_coordinates_bounds(latitude, longitude)) {
         if (!this->load(latitude, longitude)) {
-            return this->dem->type.nodata;
+            return this->dem.type.nodata;
         }
     }
 
-    return this->dem->altitude(latitude, longitude);
+    return this->dem.altitude(latitude, longitude);
 }
 
 
 double Map::interpolated_altitude(double latitude, double longitude) {
-    if (!this->dem->check_coordinates_bounds(latitude, longitude)) {
+    if (!this->dem.check_coordinates_bounds(latitude, longitude)) {
         if (!this->load(latitude, longitude)) {
-            return this->dem->type.nodata;
+            return this->dem.type.nodata;
         }
     }
 
-    return this->dem->interpolated_altitude(latitude, longitude);
+    return this->dem.interpolated_altitude(latitude, longitude);
 }
 
 
