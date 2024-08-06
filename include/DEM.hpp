@@ -97,9 +97,4 @@ public:
     bool check_coordinates_bounds(double latitude, double longitude);
     short int altitude(double latitude, double longitude);
     double interpolated_altitude(double latitude, double longitude);
-
-    static void create_dem_asc_bin(const std::string& path);
-    static void create_dem_asc_csv(const std::string& path, Type type);
-    static void create_dem_csv_bin(const std::string& path);
-    static void create_dem_bin_csv(const std::string& path, Type type);
 };
