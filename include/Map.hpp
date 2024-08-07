@@ -17,7 +17,7 @@ public:
     short int altitude(double latitude, double longitude);
     double interpolated_altitude(double latitude, double longitude);
 
-    static Type InitializeDEMMap(std::string dem_directory_path);
+    static Type initialize(std::string dem_directory_path, unsigned int nrows, unsigned int ncols, double cellsize, short int nodata);
 
 private:
     DEM dem;

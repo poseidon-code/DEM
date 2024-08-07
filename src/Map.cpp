@@ -64,7 +64,7 @@ double Map::interpolated_altitude(double latitude, double longitude) {
 }
 
 
-Map::Type Map::InitializeDEMMap(std::string dem_directory_path) {
+Map::Type Map::initialize(std::string dem_directory_path, unsigned int nrows, unsigned int ncols, double cellsize, short int nodata) {
     Map::Type map;
     std::regex pattern(R"(([-]?\d{1,2}|90)_([-]?\d{1,3}|180)\.bin)");
 
@@ -82,7 +82,8 @@ Map::Type Map::InitializeDEMMap(std::string dem_directory_path) {
                         (latitude >= -90 && latitude <= 90)
                         && (longitude >= -180 && longitude <= 180)
                     ) {
-                        map[{latitude, longitude}] = {{3600, 3600, latitude, longitude, 0.000277777, INT16_MIN}, entry.path().string()};
+                        DEM::Type type(nrows, ncols, latitude, longitude, cellsize, nodata);
+                        map[{latitude, longitude}] = {type, entry.path().string()};
                     }
                 }
             }
