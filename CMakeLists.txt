@@ -8,7 +8,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
 # libDEM
-set(LIBDEM_SOURCES src/DEM.cpp src/Map.cpp)
+set(LIBDEM_SOURCES src/DEM.cpp src/Map.cpp src/Utility.cpp)
 set(LIBDEM_INCLUDE_DIRECTORY include)
 
 
