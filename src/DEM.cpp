@@ -36,8 +36,8 @@ int DEM::read(const std::string& filepath) {
 }
 
 
-DEM::Index DEM::index(double latitude, double longitude) {
-    double dem_latitude_index = 0, dem_longitude_index = 0;
+DEM::Index DEM::index(float latitude, float longitude) {
+    float dem_latitude_index = 0, dem_longitude_index = 0;
 
     if (check_coordinates_bounds(latitude, longitude)) {
         if (latitude >= this->bounds.SW.latitude) {
@@ -57,8 +57,8 @@ DEM::Index DEM::index(double latitude, double longitude) {
         }
     } else {
         return {
-            static_cast<double>(this->type.nodata),
-            static_cast<double>(this->type.nodata)
+            static_cast<float>(this->type.nodata),
+            static_cast<float>(this->type.nodata)
         };
     }
 
@@ -88,7 +88,7 @@ DEM::~DEM() {
 }
 
 
-bool DEM::check_coordinates_bounds(double latitude, double longitude) {
+bool DEM::check_coordinates_bounds(float latitude, float longitude) {
     if (
         latitude >= this->bounds.SW.latitude
         && latitude < this->bounds.NE.latitude
@@ -101,7 +101,7 @@ bool DEM::check_coordinates_bounds(double latitude, double longitude) {
 }
 
 
-short int DEM::altitude(double latitude, double longitude) {
+short int DEM::altitude(float latitude, float longitude) {
     Index rc = index(latitude, longitude);
 
     if (rc.row == this->type.nodata || rc.column == this->type.nodata) {
@@ -117,7 +117,7 @@ short int DEM::altitude(double latitude, double longitude) {
 }
 
 
-double DEM::interpolated_altitude(double latitude, double longitude) {
+float DEM::interpolated_altitude(float latitude, float longitude) {
     Index rc = index(latitude, longitude);
 
     if (rc.row == this->type.nodata || rc.column == this->type.nodata) {
@@ -127,13 +127,13 @@ double DEM::interpolated_altitude(double latitude, double longitude) {
     size_t r = static_cast<size_t>(rc.row);
     size_t c = static_cast<size_t>(rc.column);
 
-    double del_latitude = std::min(rc.row, static_cast<double>(this->type.nrows-1)) - r;
-    double del_longitude = std::min(rc.column, static_cast<double>(this->type.ncols-1)) - c;
+    float del_latitude = std::min(rc.row, static_cast<float>(this->type.nrows-1)) - r;
+    float del_longitude = std::min(rc.column, static_cast<float>(this->type.ncols-1)) - c;
 
     size_t next_r = (r == this->type.nrows-1) ? r : r + 1;
     size_t next_c = (c == this->type.ncols-1) ? c : c + 1;
 
-    double altitude =   (1-del_latitude) * (1-del_longitude) * this->data[r][c] +
+    float altitude =   (1-del_latitude) * (1-del_longitude) * this->data[r][c] +
                         del_longitude * (1-del_latitude) * this->data[r][next_c] +
                         (1-del_longitude) * del_latitude * this->data[next_r][c] +
                         del_latitude * del_longitude * this->data[next_r][next_c];

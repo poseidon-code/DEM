@@ -29,7 +29,7 @@ Map::Map(const Type& map) {
 }
 
 
-bool Map::load(double latitude, double longitude) {
+bool Map::load(float latitude, float longitude) {
     DEM::Coordinate map_coordinate{
         std::floor(latitude),
         std::floor(longitude)
@@ -42,7 +42,7 @@ bool Map::load(double latitude, double longitude) {
 }
 
 
-short int Map::altitude(double latitude, double longitude) {
+short int Map::altitude(float latitude, float longitude) {
     if (!this->dem.check_coordinates_bounds(latitude, longitude)) {
         if (!this->load(latitude, longitude)) {
             return this->dem.type.nodata;
@@ -53,7 +53,7 @@ short int Map::altitude(double latitude, double longitude) {
 }
 
 
-double Map::interpolated_altitude(double latitude, double longitude) {
+float Map::interpolated_altitude(float latitude, float longitude) {
     if (!this->dem.check_coordinates_bounds(latitude, longitude)) {
         if (!this->load(latitude, longitude)) {
             return this->dem.type.nodata;
@@ -64,7 +64,7 @@ double Map::interpolated_altitude(double latitude, double longitude) {
 }
 
 
-Map::Type Map::initialize(std::string dem_directory_path, unsigned int nrows, unsigned int ncols, double cellsize, short int nodata) {
+Map::Type Map::initialize(std::string dem_directory_path, unsigned int nrows, unsigned int ncols, float cellsize, short int nodata) {
     Map::Type map;
     std::regex pattern(R"(([-]?\d{1,2}|90)_([-]?\d{1,3}|180)\.bin)");
 
@@ -75,8 +75,8 @@ Map::Type Map::initialize(std::string dem_directory_path, unsigned int nrows, un
                 std::smatch match;
 
                 if (std::regex_match(filename, match, pattern)) {
-                    double latitude = std::stod(match[1]);
-                    double longitude = std::stod(match[2]);
+                    float latitude = std::stod(match[1]);
+                    float longitude = std::stod(match[2]);
 
                     if (
                         (latitude >= -90 && latitude <= 90)
