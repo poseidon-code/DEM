@@ -61,8 +61,8 @@ static std::string generate_output_file_path(const std::string& input_path, cons
 
 
 void create_dem_asc_bin(const std::string& path, bool little_endian) {
-    std::vector<short int> dem_data;
-    short int value = 0;
+    std::vector<int16_t> dem_data;
+    int16_t value = 0;
     std::ifstream ifp(path);
     dynamic_metadata_skip(ifp);
 
@@ -72,14 +72,14 @@ void create_dem_asc_bin(const std::string& path, bool little_endian) {
 
     // write `dem_data` in binary format
     std::ofstream ofp(generate_output_file_path(path, "bin"), std::ios::binary | std::ios::trunc);
-    ofp.write(reinterpret_cast<char*>(dem_data.data()), dem_data.size() * sizeof(short int));
+    ofp.write(reinterpret_cast<char*>(dem_data.data()), dem_data.size() * sizeof(int16_t));
     ofp.close();
 }
 
 
 void create_dem_asc_csv(const std::string& path, DEM::Type type) {
-    std::vector<short int> dem_data;
-    short int value = 0;
+    std::vector<int16_t> dem_data;
+    int16_t value = 0;
     std::ifstream ifp(path);
     dynamic_metadata_skip(ifp);
 
@@ -89,7 +89,7 @@ void create_dem_asc_csv(const std::string& path, DEM::Type type) {
 
     // write as per '.csv' format
     std::ofstream ofp(generate_output_file_path(path, "csv"));
-    for (int i = 0; i < type.nrows * type.ncols; ++i) {
+    for (size_t i = 0; i < type.nrows * type.ncols; ++i) {
         if (i % type.ncols == type.ncols - 1)
             ofp << dem_data[i] << "\n";
         else
@@ -100,8 +100,8 @@ void create_dem_asc_csv(const std::string& path, DEM::Type type) {
 
 
 void create_dem_csv_bin(const std::string& path, bool little_endian) {
-    std::vector<short int> dem_data;
-    short int value = 0;
+    std::vector<int16_t> dem_data;
+    int16_t value = 0;
 
     // read values to `dem_data`
     std::ifstream ifp(path);
@@ -110,29 +110,29 @@ void create_dem_csv_bin(const std::string& path, bool little_endian) {
         std::istringstream iss(line);
         std::string token;
         while (std::getline(iss, token, ','))
-            dem_data.push_back(static_cast<short int>(serialize(std::stoi(token), little_endian)));
+            dem_data.push_back(static_cast<int16_t>(serialize(std::stoi(token), little_endian)));
     }
     ifp.close();
 
     // write `dem_data` in binary format
     std::ofstream ofp(generate_output_file_path(path, "bin"), std::ios::binary | std::ios::trunc);
-    ofp.write(reinterpret_cast<char*>(dem_data.data()), dem_data.size() * sizeof(short int));
+    ofp.write(reinterpret_cast<char*>(dem_data.data()), dem_data.size() * sizeof(int16_t));
     ofp.close();
 }
 
 
 void create_dem_bin_csv(const std::string& path, DEM::Type type, bool little_endian) {
-    std::vector<short int> dem_data;
-    short int value = 0;
+    std::vector<int16_t> dem_data;
+    int16_t value = 0;
 
     // read from .bin file
     std::ifstream ifp(path);
-    while (ifp.read(reinterpret_cast<char*>(&value), sizeof(short int))) dem_data.push_back(serialize(value, little_endian));
+    while (ifp.read(reinterpret_cast<char*>(&value), sizeof(int16_t))) dem_data.push_back(serialize(value, little_endian));
     ifp.close();
 
     // write as per '.csv' format
     std::ofstream ofp(generate_output_file_path(path, "csv"));
-    for (int i = 0; i < type.nrows * type.ncols; ++i) {
+    for (size_t i = 0; i < type.nrows * type.ncols; ++i) {
         if (i % type.ncols == type.ncols - 1)
             ofp << dem_data[i] << "\n";
         else

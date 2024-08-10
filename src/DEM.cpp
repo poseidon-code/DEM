@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <fstream>
 #include <string>
 #include <system_error>
@@ -8,15 +9,15 @@
 #include "DEM.hpp"
 
 
-int DEM::read(const std::string& filepath) {
-    std::ifstream fp = std::ifstream(filepath, std::ios::binary | std::ios::in);
-    short int t_value;
+int16_t DEM::read(const std::string& filepath) {
+    std::ifstream fp(filepath, std::ios::binary);
+    int16_t t_value = 0;
 
     if (fp.good() && !fp.eof()) {
-        int column_count = 0;
-        std::vector<short int> row_data;
+        size_t column_count = 0;
+        std::vector<int16_t> row_data;
 
-        while (fp.read(reinterpret_cast<char*>(&t_value), sizeof(short int))) {
+        while (fp.read(reinterpret_cast<char*>(&t_value), sizeof(int16_t))) {
             row_data.push_back(t_value);
             column_count++;
 
@@ -111,7 +112,7 @@ short int DEM::altitude(float latitude, float longitude) {
     size_t r = static_cast<size_t>(std::round(rc.row));
     size_t c = static_cast<size_t>(std::round(rc.column));
 
-    short int altitude = this->data[r][c];
+    int16_t altitude = this->data[r][c];
 
     return altitude;
 }

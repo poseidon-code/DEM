@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <map>
 #include <string>
 
@@ -14,10 +15,10 @@ public:
     Map(const Type& map);
     ~Map() = default;
 
-    short int altitude(float latitude, float longitude);
+    int16_t altitude(float latitude, float longitude);
     float interpolated_altitude(float latitude, float longitude);
 
-    static Type initialize(std::string dem_directory_path, unsigned int nrows, unsigned int ncols, float cellsize, short int nodata);
+    static Type initialize(std::string dem_directory_path, size_t nrows, size_t ncols, float cellsize, int16_t nodata);
 
 private:
     DEM dem;

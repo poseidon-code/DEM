@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -13,7 +14,7 @@ private:
         float column;
     };
 
-    int read(const std::string& filepath);
+    int16_t read(const std::string& filepath);
     Index index(float latitude, float longitude);
 
 
@@ -56,12 +57,12 @@ public:
     };
 
     struct Type {
-        unsigned int nrows;         // no. of DEM values available in row
-        unsigned int ncols;         // no. of DEM values available in column
-        float yllcorner;           // bottom left latitude
-        float xllcorner;           // bottom left longitude
-        float cellsize;            // distance (in radians) between every DEM values
-        short int nodata;           // invalid DEM value representation
+        size_t nrows;       // no. of DEM values available in row
+        size_t ncols;       // no. of DEM values available in column
+        float yllcorner;    // bottom left latitude
+        float xllcorner;    // bottom left longitude
+        float cellsize;     // distance (in radians) between every DEM values
+        int16_t nodata;     // invalid DEM value representation
 
         Type() {
             this->nrows = 0;
@@ -72,7 +73,7 @@ public:
             this->nodata = 0;
         };
 
-        Type (unsigned int nrows, unsigned int ncols, float yllcorner, float xllcorner, float cellsize, short int nodata) {
+        Type (size_t nrows, size_t ncols, float yllcorner, float xllcorner, float cellsize, int16_t nodata) {
             if (yllcorner > 90 || yllcorner < -90 || xllcorner > 180 || xllcorner < -180) {
                 std::string e = "invalid coordinates (" + std::to_string(yllcorner) +  ":" +  std::to_string(xllcorner) + ")";
                 throw std::runtime_error(e);
@@ -86,7 +87,7 @@ public:
         };
     };
 
-    std::vector<std::vector<short int>> data;
+    std::vector<std::vector<int16_t>> data;
     Type type;
     Bounds bounds;
 
@@ -95,6 +96,6 @@ public:
     ~DEM();
 
     bool check_coordinates_bounds(float latitude, float longitude);
-    short int altitude(float latitude, float longitude);
+    int16_t altitude(float latitude, float longitude);
     float interpolated_altitude(float latitude, float longitude);
 };

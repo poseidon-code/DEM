@@ -1,4 +1,5 @@
 #include <cmath>
+#include <cstdint>
 #include <filesystem>
 #include <regex>
 #include <string>
@@ -42,7 +43,7 @@ bool Map::load(float latitude, float longitude) {
 }
 
 
-short int Map::altitude(float latitude, float longitude) {
+int16_t Map::altitude(float latitude, float longitude) {
     if (!this->dem.check_coordinates_bounds(latitude, longitude)) {
         if (!this->load(latitude, longitude)) {
             return this->dem.type.nodata;
@@ -64,8 +65,8 @@ float Map::interpolated_altitude(float latitude, float longitude) {
 }
 
 
-Map::Type Map::initialize(std::string dem_directory_path, unsigned int nrows, unsigned int ncols, float cellsize, short int nodata) {
-    Map::Type map;
+Map::Type Map::initialize(std::string dem_directory_path, size_t nrows, size_t ncols, float cellsize, int16_t nodata) {
+    Map::Type type;
     std::regex pattern(R"(([-]?\d{1,2}|90)_([-]?\d{1,3}|180)\.bin)");
 
     try {
@@ -82,8 +83,8 @@ Map::Type Map::initialize(std::string dem_directory_path, unsigned int nrows, un
                         (latitude >= -90 && latitude <= 90)
                         && (longitude >= -180 && longitude <= 180)
                     ) {
-                        DEM::Type type(nrows, ncols, latitude, longitude, cellsize, nodata);
-                        map[{latitude, longitude}] = {type, entry.path().string()};
+                        DEM::Type dem_type(nrows, ncols, latitude, longitude, cellsize, nodata);
+                        type[{latitude, longitude}] = {dem_type, entry.path().string()};
                     }
                 }
             }
@@ -92,5 +93,5 @@ Map::Type Map::initialize(std::string dem_directory_path, unsigned int nrows, un
         throw std::runtime_error(std::string(e.what()) + "\n");
     }
 
-    return map;
+    return type;
 }
