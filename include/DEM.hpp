@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <system_error>
 
 
 
@@ -12,10 +13,10 @@ struct Coordinate {
     float latitude;
     float longitude;
 
-    Coordinate() {
-        this->latitude = 0;
-        this->longitude = 0;
-    };
+    Coordinate()
+        : latitude(0), 
+        longitude(0) 
+    {};
 
     Coordinate(float latitude, float longitude) {
         if (latitude > 90 || latitude < -90 || longitude > 180 || longitude < -180) {
@@ -26,15 +27,48 @@ struct Coordinate {
         this->longitude = longitude;
     };
 
-    bool operator<(const Coordinate& other) const {
-        if (latitude == other.latitude) {
-            return longitude < other.longitude;
+    Coordinate(const Coordinate& o) 
+        : latitude(o.latitude), 
+        longitude(o.longitude)
+    {};
+
+    Coordinate& operator=(const Coordinate& o) {
+        if (this != &o) {
+            latitude = o.latitude;
+            longitude = o.longitude;
         }
-        return latitude < other.latitude;
+        return *this;
     }
 
-    bool operator==(const Coordinate& other) const {
-        return latitude == other.latitude && longitude == other.longitude;
+    Coordinate(Coordinate&& o) noexcept
+        : latitude(o.latitude), 
+        longitude(o.longitude) 
+    {
+        o.latitude = 0;
+        o.longitude = 0;
+    }
+
+    Coordinate& operator=(Coordinate&& o) noexcept {
+        if (this != &o) {
+            latitude = o.latitude;
+            longitude = o.longitude;
+            o.latitude = 0;
+            o.longitude = 0;
+        }
+        return *this;
+    }
+
+    ~Coordinate() = default;
+
+    bool operator<(const Coordinate& o) const {
+        if (latitude == o.latitude) {
+            return longitude < o.longitude;
+        }
+        return latitude < o.latitude;
+    }
+
+    bool operator==(const Coordinate& o) const {
+        return latitude == o.latitude && longitude == o.longitude;
     }
 };
 
