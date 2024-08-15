@@ -93,23 +93,17 @@ private:
 
 
     int16_t read(const std::string& filepath) {
-        static constexpr auto is_system_little_endian = []() -> bool {
-            union {int16_t value; uint8_t bytes[sizeof(value)];} x{};
-            x.value = 1;
-            return x.bytes[0] == 1;
-        };
+        union {int16_t value; uint8_t bytes[sizeof(value)];} x;
+        x.value = 1;
+        bool is_system_little_endian = x.bytes[0] == 1;
+        union {T value; uint8_t bytes[sizeof(T)];} t;
 
-        static union {
-            T value;
-            uint8_t bytes[sizeof(T)];
-        } t{};
-
-        static auto serialize = [](T value) -> T {
+        auto serialize = [is_system_little_endian, &t](T value) -> T {
             t.value = value;
-            if (little_endian && is_system_little_endian()) {
+            if (little_endian && is_system_little_endian) {
                 return t.value;
             } else {
-                std::reverse(t.bytes, t.bytes + sizeof(t.value));
+                std::reverse(t.bytes, t.bytes + sizeof(T));
                 return t.value;
             }
         };
