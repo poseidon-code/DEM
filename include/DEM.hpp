@@ -79,6 +79,51 @@ struct Bounds {
     Coordinate NE;
     Coordinate SW;
     Coordinate SE;
+
+    Bounds() = default;
+
+    Bounds(const Coordinate& NW, const Coordinate& NE, const Coordinate& SW, const Coordinate& SE)
+        : NW(NW), 
+        NE(NE), 
+        SW(SW), 
+        SE(SE)
+    {};
+
+    Bounds(const Bounds& other) 
+        : NW(other.NW), 
+        NE(other.NE), 
+        SW(other.SW), 
+        SE(other.SE) 
+    {};
+
+    Bounds& operator=(const Bounds& other) {
+        if (this != &other) {
+            NW = other.NW;
+            NE = other.NE;
+            SW = other.SW;
+            SE = other.SE;
+        }
+        return *this;
+    };
+
+    Bounds(Bounds&& other) noexcept
+        : NW(std::move(other.NW)), 
+        NE(std::move(other.NE)), 
+        SW(std::move(other.SW)), 
+        SE(std::move(other.SE)) 
+    {};
+
+    Bounds& operator=(Bounds&& other) noexcept {
+        if (this != &other) {
+            NW = std::move(other.NW);
+            NE = std::move(other.NE);
+            SW = std::move(other.SW);
+            SE = std::move(other.SE);
+        }
+        return *this;
+    };
+
+    ~Bounds() = default;
 };
 
 
