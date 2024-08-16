@@ -40,7 +40,7 @@ public:
 
 
     T altitude(float latitude, float longitude) {
-        if (!this->dem.check_coordinates_bounds(latitude, longitude)) {
+        if (!this->dem.bounds.within(latitude, longitude)) {
             if (!this->load(latitude, longitude)) {
                 return this->dem.type.nodata;
             }
@@ -51,7 +51,7 @@ public:
 
 
     float interpolated_altitude(float latitude, float longitude) {
-        if (!this->dem.check_coordinates_bounds(latitude, longitude)) {
+        if (!this->dem.bounds.within(latitude, longitude)) {
             if (!this->load(latitude, longitude)) {
                 return this->dem.type.nodata;
             }

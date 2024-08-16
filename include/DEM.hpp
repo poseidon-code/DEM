@@ -89,41 +89,54 @@ struct Bounds {
         SE(SE)
     {};
 
-    Bounds(const Bounds& other) 
-        : NW(other.NW), 
-        NE(other.NE), 
-        SW(other.SW), 
-        SE(other.SE) 
+    Bounds(const Bounds& o) 
+        : NW(o.NW), 
+        NE(o.NE), 
+        SW(o.SW), 
+        SE(o.SE) 
     {};
 
-    Bounds& operator=(const Bounds& other) {
-        if (this != &other) {
-            NW = other.NW;
-            NE = other.NE;
-            SW = other.SW;
-            SE = other.SE;
+    Bounds& operator=(const Bounds& o) {
+        if (this != &o) {
+            this->NW = o.NW;
+            this->NE = o.NE;
+            this->SW = o.SW;
+            this->SE = o.SE;
         }
         return *this;
     };
 
-    Bounds(Bounds&& other) noexcept
-        : NW(std::move(other.NW)), 
-        NE(std::move(other.NE)), 
-        SW(std::move(other.SW)), 
-        SE(std::move(other.SE)) 
+    Bounds(Bounds&& o) noexcept
+        : NW(std::move(o.NW)), 
+        NE(std::move(o.NE)), 
+        SW(std::move(o.SW)), 
+        SE(std::move(o.SE)) 
     {};
 
-    Bounds& operator=(Bounds&& other) noexcept {
-        if (this != &other) {
-            NW = std::move(other.NW);
-            NE = std::move(other.NE);
-            SW = std::move(other.SW);
-            SE = std::move(other.SE);
+    Bounds& operator=(Bounds&& o) noexcept {
+        if (this != &o) {
+            this->NW = std::move(o.NW);
+            this->NE = std::move(o.NE);
+            this->SW = std::move(o.SW);
+            this->SE = std::move(o.SE);
         }
         return *this;
     };
 
     ~Bounds() = default;
+
+    bool within(float latitude, float longitude) {
+        if (
+            latitude >= this->SW.latitude
+            && latitude < this->NE.latitude
+            && longitude >= this->SW.longitude
+            && longitude < this->NE.longitude
+        ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 };
 
 
@@ -183,7 +196,7 @@ private:
     Index index(float latitude, float longitude) {
         float dem_latitude_index = 0, dem_longitude_index = 0;
 
-        if (check_coordinates_bounds(latitude, longitude)) {
+        if (this->bounds.within(latitude, longitude)) {
             if (latitude >= this->bounds.SW.latitude) {
                 // Northern Hemisphere
                 dem_latitude_index = (this->bounds.NE.latitude - latitude) / this->type.cellsize;
@@ -270,19 +283,6 @@ public:
 
     ~DEM() {
         this->data.clear();
-    };
-
-
-    bool check_coordinates_bounds(float latitude, float longitude) {
-        if (
-            latitude >= this->bounds.SW.latitude
-            && latitude < this->bounds.NE.latitude
-            && longitude >= this->bounds.SW.longitude
-            && longitude < this->bounds.NE.longitude
-        )
-            return true;
-        else
-            return false;
     };
 
 
