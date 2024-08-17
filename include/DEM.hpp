@@ -245,6 +245,9 @@ public:
         };
 
         Type (size_t nrows, size_t ncols, float yllcorner, float xllcorner, float cellsize, T nodata) {
+            if (nrows == 0 || ncols == 0) {
+                throw std::runtime_error("invalid data dimensions, nrows = 0 & ncols = 0");
+            }
             if (yllcorner > 90 || yllcorner < -90 || xllcorner > 180 || xllcorner < -180) {
                 std::string e = "invalid coordinates (" + std::to_string(yllcorner) +  ":" +  std::to_string(xllcorner) + ")";
                 throw std::runtime_error(e);
