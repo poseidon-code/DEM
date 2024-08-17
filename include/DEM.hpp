@@ -14,8 +14,8 @@ struct Coordinate {
     float longitude;
 
     Coordinate()
-        : latitude(0), 
-        longitude(0) 
+        : latitude(0),
+        longitude(0)
     {};
 
     Coordinate(float latitude, float longitude) {
@@ -27,8 +27,8 @@ struct Coordinate {
         this->longitude = longitude;
     };
 
-    Coordinate(const Coordinate& o) 
-        : latitude(o.latitude), 
+    Coordinate(const Coordinate& o)
+        : latitude(o.latitude),
         longitude(o.longitude)
     {};
 
@@ -41,8 +41,8 @@ struct Coordinate {
     }
 
     Coordinate(Coordinate&& o) noexcept
-        : latitude(o.latitude), 
-        longitude(o.longitude) 
+        : latitude(o.latitude),
+        longitude(o.longitude)
     {
         o.latitude = 0;
         o.longitude = 0;
@@ -83,17 +83,17 @@ struct Bounds {
     Bounds() = default;
 
     Bounds(const Coordinate& NW, const Coordinate& NE, const Coordinate& SW, const Coordinate& SE)
-        : NW(NW), 
-        NE(NE), 
-        SW(SW), 
+        : NW(NW),
+        NE(NE),
+        SW(SW),
         SE(SE)
     {};
 
-    Bounds(const Bounds& o) 
-        : NW(o.NW), 
-        NE(o.NE), 
-        SW(o.SW), 
-        SE(o.SE) 
+    Bounds(const Bounds& o)
+        : NW(o.NW),
+        NE(o.NE),
+        SW(o.SW),
+        SE(o.SE)
     {};
 
     Bounds& operator=(const Bounds& o) {
@@ -107,10 +107,10 @@ struct Bounds {
     };
 
     Bounds(Bounds&& o) noexcept
-        : NW(std::move(o.NW)), 
-        NE(std::move(o.NE)), 
-        SW(std::move(o.SW)), 
-        SE(std::move(o.SE)) 
+        : NW(std::move(o.NW)),
+        NE(std::move(o.NE)),
+        SW(std::move(o.SW)),
+        SE(std::move(o.SE))
     {};
 
     Bounds& operator=(Bounds&& o) noexcept {
@@ -277,7 +277,7 @@ public:
         };
 
         // read the DEM file (sets: this->data)
-        if (read(filepath) != EXIT_SUCCESS) std::runtime_error("\nfailed to read DEM file");
+        if (this->read(filepath) != EXIT_SUCCESS) std::runtime_error("\nfailed to read DEM file");
     };
 
 
@@ -287,7 +287,7 @@ public:
 
 
     T altitude(float latitude, float longitude) {
-        Index rc = index(latitude, longitude);
+        Index rc = this->index(latitude, longitude);
 
         if (rc.row == this->type.nodata || rc.column == this->type.nodata) {
             return this->type.nodata;
@@ -297,7 +297,7 @@ public:
         size_t c = static_cast<size_t>(std::round(rc.column));
 
         r = r == this->type.nrows ? r - 1 : r;
-        c = c == this->type.nrows ? c - 1 : c;
+        c = c == this->type.ncols ? c - 1 : c;
 
         T altitude = this->data[r][c];
 
@@ -306,7 +306,7 @@ public:
 
 
     float interpolated_altitude(float latitude, float longitude) {
-        Index rc = index(latitude, longitude);
+        Index rc = this->index(latitude, longitude);
 
         if (rc.row == this->type.nodata || rc.column == this->type.nodata) {
             return this->type.nodata;
