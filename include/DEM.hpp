@@ -235,16 +235,23 @@ public:
         float cellsize;     // distance (in radians) between every DEM values
         T nodata;           // invalid DEM value representation
 
-        Type() {
-            this->nrows = 0;
-            this->ncols = 0;
-            this->yllcorner = 0;
-            this->xllcorner = 0;
-            this->cellsize = 0;
-            this->nodata = 0;
-        };
+        Type()
+            : nrows(0),
+            ncols(0),
+            yllcorner(0),
+            xllcorner(0),
+            cellsize(0),
+            nodata(0)
+        {};
 
-        Type (size_t nrows, size_t ncols, float yllcorner, float xllcorner, float cellsize, T nodata) {
+        Type (size_t nrows, size_t ncols, float yllcorner, float xllcorner, float cellsize, T nodata)
+            : nrows(nrows),
+            ncols(ncols),
+            yllcorner(yllcorner),
+            xllcorner(xllcorner),
+            cellsize(cellsize),
+            nodata(nodata)
+         {
             if (nrows == 0 || ncols == 0) {
                 throw std::runtime_error("invalid data dimensions, nrows = 0 & ncols = 0");
             }
@@ -252,13 +259,13 @@ public:
                 std::string e = "invalid coordinates (" + std::to_string(yllcorner) +  ":" +  std::to_string(xllcorner) + ")";
                 throw std::runtime_error(e);
             }
-            this->nrows = nrows;
-            this->ncols = ncols;
-            this->yllcorner = yllcorner;
-            this->xllcorner = xllcorner;
-            this->cellsize = cellsize;
-            this->nodata = nodata;
         };
+
+        Type(const Type& o) = default;
+        Type& operator=(const Type& o) = default;
+        Type(Type&& o) noexcept = default;
+        Type& operator=(Type&& o) noexcept = default;
+        ~Type() = default;
     };
 
 
