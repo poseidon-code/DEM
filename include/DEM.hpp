@@ -18,46 +18,20 @@ struct Coordinate {
         longitude(0)
     {};
 
-    Coordinate(float latitude, float longitude) {
+    Coordinate(float latitude, float longitude)
+        : latitude(latitude),
+        longitude(longitude)
+    {
         if (latitude > 90 || latitude < -90 || longitude > 180 || longitude < -180) {
             std::string e = "invalid coordinates (" + std::to_string(latitude) +  ":" +  std::to_string(longitude) + ")";
             throw std::runtime_error(e);
         }
-        this->latitude = latitude;
-        this->longitude = longitude;
     };
 
-    Coordinate(const Coordinate& o)
-        : latitude(o.latitude),
-        longitude(o.longitude)
-    {};
-
-    Coordinate& operator=(const Coordinate& o) {
-        if (this != &o) {
-            latitude = o.latitude;
-            longitude = o.longitude;
-        }
-        return *this;
-    }
-
-    Coordinate(Coordinate&& o) noexcept
-        : latitude(o.latitude),
-        longitude(o.longitude)
-    {
-        o.latitude = 0;
-        o.longitude = 0;
-    }
-
-    Coordinate& operator=(Coordinate&& o) noexcept {
-        if (this != &o) {
-            latitude = o.latitude;
-            longitude = o.longitude;
-            o.latitude = 0;
-            o.longitude = 0;
-        }
-        return *this;
-    }
-
+    Coordinate(const Coordinate& o) = default;
+    Coordinate& operator=(const Coordinate& o) = default;
+    Coordinate(Coordinate&& o) noexcept = default;
+    Coordinate& operator=(Coordinate&& o) noexcept = default;
     ~Coordinate() = default;
 
     bool operator<(const Coordinate& o) const {
@@ -89,40 +63,10 @@ struct Bounds {
         SE(SE)
     {};
 
-    Bounds(const Bounds& o)
-        : NW(o.NW),
-        NE(o.NE),
-        SW(o.SW),
-        SE(o.SE)
-    {};
-
-    Bounds& operator=(const Bounds& o) {
-        if (this != &o) {
-            this->NW = o.NW;
-            this->NE = o.NE;
-            this->SW = o.SW;
-            this->SE = o.SE;
-        }
-        return *this;
-    };
-
-    Bounds(Bounds&& o) noexcept
-        : NW(std::move(o.NW)),
-        NE(std::move(o.NE)),
-        SW(std::move(o.SW)),
-        SE(std::move(o.SE))
-    {};
-
-    Bounds& operator=(Bounds&& o) noexcept {
-        if (this != &o) {
-            this->NW = std::move(o.NW);
-            this->NE = std::move(o.NE);
-            this->SW = std::move(o.SW);
-            this->SE = std::move(o.SE);
-        }
-        return *this;
-    };
-
+    Bounds(const Bounds& o) = default;
+    Bounds& operator=(const Bounds& o) = default;
+    Bounds(Bounds&& o) noexcept = default;
+    Bounds& operator=(Bounds&& o) noexcept = default;
     ~Bounds() = default;
 
     bool within(float latitude, float longitude) {
