@@ -235,9 +235,11 @@ public:
     };
 
 
-    ~DEM() {
-        this->data.clear();
-    };
+    DEM(const DEM& other) = default;
+    DEM& operator=(const DEM& other) = default;
+    DEM(DEM&& other) noexcept = default;
+    DEM& operator=(DEM&& other) noexcept = default;
+    ~DEM() = default;
 
 
     T altitude(float latitude, float longitude) {
