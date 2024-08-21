@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <filesystem>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -230,8 +231,16 @@ public:
             {this->type.yllcorner, this->type.xllcorner + (this->type.cellsize * this->type.ncols)}
         };
 
+        if (!std::filesystem::exists(filepath)) {
+            std::string e = "DEM file '" + filepath + "' not found";
+            throw std::runtime_error(e);
+        }
+
         // read the DEM file (sets: this->data)
-        if (this->read(filepath) != EXIT_SUCCESS) std::runtime_error("\nfailed to read DEM file");
+        if (this->read(filepath) != EXIT_SUCCESS) {
+            std::string e = "failed to read DEM data from '" + filepath + "'";
+            throw std::runtime_error(e);
+        }
     };
 
 
