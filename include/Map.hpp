@@ -9,7 +9,7 @@
 #include "DEM.hpp"
 
 
-template <typename T, bool little_endian = true>
+template <dem_datatype T, bool little_endian = true>
 class Map {
 public:
     using Grid = std::map<Coordinate, std::pair<typename DEM<T, little_endian>::Type, std::string>>;

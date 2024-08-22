@@ -1,10 +1,12 @@
 #pragma once
 
 #include <algorithm>
+#include <concepts>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <type_traits>
 #include <vector>
 #include <system_error>
 
@@ -85,8 +87,19 @@ struct Bounds {
 };
 
 
+template <typename T>
+concept dem_datatype = 
+    std::is_arithmetic_v<T> && 
+    !std::is_same_v<T, bool> && 
+    !std::is_same_v<T, char> && 
+    !std::is_same_v<T, signed char> && 
+    !std::is_same_v<T, unsigned char> && 
+    !std::is_same_v<T, char16_t> && 
+    !std::is_same_v<T, char32_t> && 
+    !std::is_same_v<T, wchar_t>;
 
-template <typename T, bool little_endian = true>
+
+template <dem_datatype T, bool little_endian = true>
 class DEM {
 private:
     struct Index {

@@ -1,14 +1,14 @@
 #pragma once
 
 #include <fstream>
-#include <string>
 #include <sstream>
+#include <string>
 #include <vector>
 
 #include "DEM.hpp"
 
 
-template <typename T, bool little_endian = true>
+template <dem_datatype T, bool little_endian = true>
 class Utility {
 private:
     static constexpr bool is_system_little_endian() {
