@@ -1,7 +1,6 @@
 #pragma once
 
 #include <algorithm>
-#include <concepts>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
@@ -88,7 +87,7 @@ struct Bounds {
 
 
 template <typename T>
-concept dem_datatype = 
+using enable_if_dem_datatype = typename std::enable_if_t<
     std::is_arithmetic_v<T> && 
     !std::is_same_v<T, bool> && 
     !std::is_same_v<T, char> && 
@@ -96,10 +95,13 @@ concept dem_datatype =
     !std::is_same_v<T, unsigned char> && 
     !std::is_same_v<T, char16_t> && 
     !std::is_same_v<T, char32_t> && 
-    !std::is_same_v<T, wchar_t>;
+    !std::is_same_v<T, wchar_t>,
+    int
+>;
 
 
-template <dem_datatype T, bool little_endian = true>
+
+template <typename T, bool little_endian = true, enable_if_dem_datatype<T> = 0>
 class DEM {
 private:
     struct Index {

@@ -8,7 +8,7 @@
 #include "DEM.hpp"
 
 
-template <dem_datatype T, bool little_endian = true>
+template <typename T, bool little_endian = true, enable_if_dem_datatype<T> = 0>
 class Utility {
 private:
     static constexpr bool is_system_little_endian() {

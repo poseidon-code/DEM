@@ -9,7 +9,7 @@
 #include "DEM.hpp"
 
 
-template <dem_datatype T, bool little_endian = true>
+template <typename T, bool little_endian = true, enable_if_dem_datatype<T> = 0>
 class Map {
 public:
     using Grid = std::map<Coordinate, std::pair<typename DEM<T, little_endian>::Type, std::string>>;
@@ -62,7 +62,7 @@ public:
 
 
     static Grid initialize(std::string dem_directory_path, size_t nrows, size_t ncols, float cellsize, T nodata) {
-        Map<T, little_endian>::Grid grid;
+        typename Map<T, little_endian>::Grid grid;
         std::regex pattern(R"(([-]?\d{1,2}|90)_([-]?\d{1,3}|180)\.bin)");
 
         try {
