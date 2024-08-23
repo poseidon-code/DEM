@@ -73,7 +73,7 @@ public:
     };
 
 
-    static void create_dem_asc_csv(const std::string& path, const DEM<T, little_endian>::Type type) {
+    static void create_dem_asc_csv(const std::string& path, const typename DEM<T, little_endian>::Type type) {
         std::vector<T> dem_data;
         T value = 0;
         std::ifstream ifp(path);
@@ -117,7 +117,7 @@ public:
     };
 
 
-    static void create_dem_bin_csv(const std::string& path, const DEM<T, little_endian>::Type type) {
+    static void create_dem_bin_csv(const std::string& path, const typename DEM<T, little_endian>::Type type) {
         std::vector<T> dem_data;
         T value = 0;
 
