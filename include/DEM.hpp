@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <filesystem>
 #include <fstream>
 #include <string>
 #include <type_traits>
@@ -246,7 +245,7 @@ public:
             {this->type.yllcorner, this->type.xllcorner + (this->type.cellsize * this->type.ncols)}
         };
 
-        if (!std::filesystem::exists(filepath)) {
+        if (!std::ifstream(filepath).good()) {
             std::string e = "DEM file '" + filepath + "' not found";
             throw std::runtime_error(e);
         }

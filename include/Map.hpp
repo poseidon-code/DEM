@@ -1,10 +1,16 @@
 #pragma once
 
 #include <cstdint>
-#include <filesystem>
 #include <map>
 #include <regex>
 #include <string>
+#include <iostream>
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <dirent.h>
+#endif
 
 #include "DEM.hpp"
 
@@ -23,7 +29,7 @@ public:
         for (auto m = grid.cbegin(); m != grid.cend(); m++) {
             std::string file_path = m->second.second;
 
-            if (!std::filesystem::exists(file_path)) {
+            if (!std::ifstream(file_path).good()) {
                 std::string e = "'" + file_path + "' file doesn't exists\n";
                 throw std::runtime_error(e);
             }
@@ -65,28 +71,56 @@ public:
         typename Map<T, little_endian>::Grid grid;
         std::regex pattern(R"(([-]?\d{1,2}|90)_([-]?\d{1,3}|180)\.bin)");
 
-        try {
-            for (const auto& entry : std::filesystem::directory_iterator(dem_directory_path)) {
-                if (std::filesystem::is_regular_file(entry.status())) {
-                    std::string filename = entry.path().filename().string();
-                    std::smatch match;
+        std::vector<std::string> file_list;
 
-                    if (std::regex_match(filename, match, pattern)) {
-                        float latitude = std::stod(match[1]);
-                        float longitude = std::stod(match[2]);
+        #ifdef _WIN32
+            WIN32_FIND_DATA t_file;
+            HANDLE finde_handle = FindFirstFile((dem_directory_path + "\\*").c_str(), &t_file);
 
-                        if (
-                            (latitude >= -90 && latitude <= 90)
-                            && (longitude >= -180 && longitude <= 180)
-                        ) {
-                            typename DEM<T, little_endian>::Type type(nrows, ncols, latitude, longitude, cellsize, nodata);
-                            grid[{latitude, longitude}] = {type, entry.path().string()};
-                        }
+            if (finde_handle == INVALID_HANDLE_VALUE) {
+                throw std::runtime_error("error reading directory '" + dem_directory_path + "'");
+            }
+
+            do {
+                if (!(t_file.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+                    file_list.push_back(dem_directory_path + t_file.cFileName);
+                }
+            } while (FindNextFile(finde_handle, &t_file) != 0);
+
+            FindClose(finde_handle);
+        #else
+            DIR* dir;
+            struct dirent* entry;
+
+            if ((dir = opendir(dem_directory_path.c_str())) != nullptr) {
+                while ((entry = readdir(dir)) != nullptr) {
+                    if (entry->d_type != DT_DIR) {
+                        file_list.push_back(dem_directory_path + entry->d_name);
                     }
                 }
+                closedir(dir);
+            } else {
+                throw std::runtime_error("error reading directory '" + dem_directory_path + "'");
             }
-        } catch (const std::filesystem::filesystem_error& e) {
-            throw std::runtime_error(std::string(e.what()) + "\n");
+        #endif
+
+        for (const auto& filepath : file_list) {
+            std::cout << filepath << std::endl;
+
+            std::string filename = filepath.substr(filepath.find_last_of("/\\") + 1);
+            std::smatch match;
+            if (std::regex_match(filename, match, pattern)) {
+                float latitude = std::stof(match[1]);
+                float longitude = std::stof(match[2]);
+
+                if (
+                    (latitude >= -90 && latitude <= 90) 
+                    && (longitude >= -180 && longitude <= 180)
+                ) {
+                    typename DEM<T, little_endian>::Type type(nrows, ncols, latitude, longitude, cellsize, nodata);
+                    grid[{latitude, longitude}] = {type, filepath};
+                }
+            }
         }
 
         return grid;
