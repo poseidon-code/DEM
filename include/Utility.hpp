@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <system_error>
 
 #include "DEM.hpp"
 
@@ -60,6 +61,11 @@ public:
         std::vector<T> dem_data;
         T value = 0;
         std::ifstream ifp(path);
+        if (!ifp.good()) {
+            std::string e = "file '" + path + "' not found";
+            throw std::runtime_error(e);
+        }
+
         dynamic_metadata_skip(ifp);
 
         // read values to `dem_data`
@@ -77,6 +83,11 @@ public:
         std::vector<T> dem_data;
         T value = 0;
         std::ifstream ifp(path);
+        if (!ifp.good()) {
+            std::string e = "file '" + path + "' not found";
+            throw std::runtime_error(e);
+        }
+
         dynamic_metadata_skip(ifp);
 
         // read values to `dem_data`
@@ -98,9 +109,13 @@ public:
     static void create_dem_csv_bin(const std::string& path){
         std::vector<T> dem_data;
         T value = 0;
+        std::ifstream ifp(path);
+        if (!ifp.good()) {
+            std::string e = "file '" + path + "' not found";
+            throw std::runtime_error(e);
+        }
 
         // read values to `dem_data`
-        std::ifstream ifp(path);
         std::string line;
         while (std::getline(ifp, line)) {
             std::istringstream iss(line);
@@ -120,9 +135,13 @@ public:
     static void create_dem_bin_csv(const std::string& path, const typename DEM<T, little_endian>::Type type) {
         std::vector<T> dem_data;
         T value = 0;
+        std::ifstream ifp(path);
+        if (!ifp.good()) {
+            std::string e = "file '" + path + "' not found";
+            throw std::runtime_error(e);
+        }
 
         // read from .bin file
-        std::ifstream ifp(path);
         while (ifp.read(reinterpret_cast<char*>(&value), sizeof(T))) dem_data.push_back(serialize(value));
         ifp.close();
 
