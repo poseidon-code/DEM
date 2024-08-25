@@ -1,7 +1,7 @@
 # Digital Elevation Model
 
-A simple library for getting ground height (above mean sea level)
-from provided latitude & longitude using the DEM data of the particular area.
+A simple library for accessing elevation values from provided latitude & longitude
+using the DEM data of the particular area.
 
 ## Setting up DEM data
 
@@ -16,17 +16,19 @@ from provided latitude & longitude using the DEM data of the particular area.
 3. The text based DEM data should be converted to binary file by using the library.
 
     ```cpp
-    #inculde "DEM.hpp"
+    #inculde "Utility.hpp"
 
     int main() {
-        DEM::create_dem_asc_bin("./14_76.asc");
         // creates the `*.bin` file at the same directory as that of the `*.asc` file.
+        Utility<int16_t, false>::create_dem_asc_bin("./14_76.asc");
+        // Utility<datatype = int16_t, little_endian = false> : writes 2 byte signed integer values with big-endian (little_endian = FALSE) byte order
+        // (default: little_endian = TRUE, i.e. little-endian byte order)
 
         return 0;
     }
     ```
 
-## Reading DEM data
+## DEM Operations
 
 1. The different parameters of the downloaded DEM data should be known (also available after conversion to ASCII representation) :
 
@@ -43,43 +45,39 @@ from provided latitude & longitude using the DEM data of the particular area.
     #include "DEM.hpp"
 
     int main() {
-        DEM::Type type = DEM::Type(3600, 3600, 14, 76, 0.000277777, INT16_MIN); // nrows, ncols, yllcorner, xllcorner, cellsize, nodata
-        DEM dem = DEM(type, "/home/user/DEM/14_76.bin"); // initialise
+        // DEM<datatype = int16_t, little_endian = false> : sets up an array of 2 byte signed integer values with big-endian (little_endian = FALSE) byte order,
+        // (default: little_endian = TRUE, i.e. little-endian byte order)
+
+        DEM<int16_t, false>::Type type = DEM::Type(3600, 3600, 14, 76, 0.000277777, INT16_MIN); // nrows, ncols, yllcorner, xllcorner, cellsize, nodata
+
+        // the byte order of the '*.bin' file should be known
+        DEM<int16_t, false> dem(type, "/home/user/DEM/14_76.bin"); // initialise
 
         return 0;
     }
     ```
 
-## Operations
+### Operations
 
-1. **Altitude** : returns the DEM height of the given coordinate as it is in DEM data
+1. **Altitude** : returns the DEM height of the given coordinate as the type as in DEM data
 
     ```cpp
-    double Latitude = 14.6705686, Longitude = 76.5106390;
+    float Latitude = 14.6705686, Longitude = 76.5106390;
 
-    short int altitude = dem.altitude(Latitude, Longitude);
+    auto altitude = dem.altitude(Latitude, Longitude);
     std::cout << "Height :" << altitude << std::endl;
     ```
 
 2. **Interpolated Altitude** : returns the interpolated DEM height of the given coordinate
 
     ```cpp
-    double Latitude = 14.6705686, Longitude = 76.5106390;
+    float Latitude = 14.6705686, Longitude = 76.5106390;
 
-    double interpolated_altitude = dem.interpolated_altitude(Latitude, Longitude);
+    float interpolated_altitude = dem.interpolated_altitude(Latitude, Longitude);
     std::cout << "Interpolated Height : " << interpolated_altitude << std::endl;
     ```
 
-3. **Patch** : returns an 2D vector of the surrounding DEM data of a valid coordinate.
-
-    ```cpp
-    double Latitude = 14.6705686, Longitude = 76.5106390;
-    unsigned int radius = 10;
-
-    std::vector<std::vector<short int>> patch = dem.patch(Latitude, Longitude, radius);
-    ```
-
-## File Conversion Operations
+## Utility Operations
 
 These functions converts files to the following formats and saves them in the same directory as that of the input files :
 
@@ -90,24 +88,24 @@ These functions converts files to the following formats and saves them in the sa
 1. **`.asc` to `.bin`** : converts `.asc` _(text)_ file to `.bin` _(binary)_ file
 
     ```cpp
-    DEM::create_dem_asc_bin("./14_76.asc");
+    Utility<int16_t, false>::create_dem_asc_bin("./14_76.asc");
     ```
 
 2. **`.asc` to `.csv`** : converts `.asc` _(text)_ file to `.csv` _(comma seperated values)_ file
 
     ```cpp
-    DEM::create_dem_asc_csv("./14_76.asc", type);
+    Utility<int16_t, false>::create_dem_asc_csv("./14_76.asc", type);
     ```
 
 3. **`.bin` to `.csv`** : converts `.bin` _(binary)_ file to `.csv` _(comma seperated values)_ file
 
     ```cpp
-    DEM::create_dem_bin_csv("./14_76.bin", type);
+    Utility<int16_t, false>::create_dem_bin_csv("./14_76.bin", type);
     ```
 
 4. **`.csv` to `.bin`** : converts `.csv` _(comma seperated values)_ file to `.bin` _(binary)_ file
     ```cpp
-    DEM::create_dem_csv_bin("./14_76.csv");
+    Utility<int16_t, false>::create_dem_csv_bin("./14_76.csv");
     ```
 
 ## Usage
@@ -117,24 +115,73 @@ These functions converts files to the following formats and saves them in the sa
 #include "DEM.hpp"
 
 int main() {
-    DEM::Type type = DEM::Type(3600, 3600, 14, 76, 0.000277777, INT16_MIN); // nrows, ncols, yllcorner, xllcorner, cellsize, nodata
-    DEM dem = DEM(type, "/home/user/DEM/14_76.bin"); // initialise
+    DEM<int16_t, false>::Type type = DEM::Type(3600, 3600, 14, 76, 0.000277777, INT16_MIN); // nrows, ncols, yllcorner, xllcorner, cellsize, nodata
+    DEM<int16_t, false> dem = DEM(type, "/home/user/DEM/14_76.bin"); // initialise
 
     return 0;
 }
 ```
 
-## Building
+## Map Operations
 
-Use `CMake` **_(required)_** to build both shared and static libraries of DEM.\
-Open a terminal inside DEM project directory and paste the following commands.
+Creates a grid of DEM data which can be dynamically loaded into memory at runtime
+when accessing a coordinate which is not bounded by the currently loaded DEM data.
 
-```sh
-mkdir build
-cd build
-cmake ..
-cmake --build .
-```
+1. Create a mapping of DEM files to coordinates.
+
+    ```cpp
+    #include "Map.hpp"
+
+    int main() {
+        // Map<datatype = int16_t, little_endian = false> : sets up DEM of 2 byte signed integer values with big-endian (little_endian = FALSE) byte order,
+        // (default: little_endian = TRUE, i.e. little-endian byte order)
+
+        Map<int16_t, false>::Grid grid;
+        grid[{14, 76}] = {{3600, 3600, 14, 76, 0.000277777, INT16_MIN}, "/home/user/DEM/14_76.bin"};
+        grid[{14, 77}] = {{3600, 3600, 14, 77, 0.000277777, INT16_MIN}, "/home/user/DEM/14_77.bin"};
+        grid[{14, 78}] = {{3600, 3600, 14, 78, 0.000277777, INT16_MIN}, "/home/user/DEM/14_77.bin"};
+
+        Map<int16_t, false> map(grid); // initialise
+
+        return 0;
+    }
+    ```
+
+    **OR**, dynamically create grid from DEM files in a directory \
+    _(**NOTE** : all the DEM files in the directory must conform to `<latitude>_<longitude>.bin` file name and must have same properties (`nrows`, `ncols`, `cellsize`, `nodata`))_
+
+    ```cpp
+    #include "Map.hpp"
+
+    int main() {
+        Map<int16_t, false>::Grid grid = Map<int16_t, true>::initialize("/home/user/DEM/", 3600, 3600, 0.00027777, INT16_MIN); // `/` (`\\` in Windows) required at end of the directory path
+
+        Map<int16_t, false> map(grid); // initialise
+
+        return 0;
+    }
+    ```
+
+### Operations
+
+1. **Altitude** : returns the DEM height of the given coordinate as the type as in DEM data
+
+    ```cpp
+    float Latitude = 14.6705686, Longitude = 76.5106390;
+
+    auto altitude = map.altitude(Latitude, Longitude);
+    std::cout << "Height :" << altitude << std::endl;
+    ```
+
+2. **Interpolated Altitude** : returns the interpolated DEM height of the given coordinate
+
+    ```cpp
+    float Latitude = 14.6705686, Longitude = 76.5106390;
+
+    float interpolated_altitude = map.interpolated_altitude(Latitude, Longitude);
+    std::cout << "Interpolated Height : " << interpolated_altitude << std::endl;
+    ``
+    ```
 
 # [License](./LICENSE)
 
