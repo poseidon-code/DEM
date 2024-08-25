@@ -4,7 +4,6 @@
 #include <map>
 #include <regex>
 #include <string>
-#include <iostream>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -105,8 +104,6 @@ public:
         #endif
 
         for (const auto& filepath : file_list) {
-            std::cout << filepath << std::endl;
-
             std::string filename = filepath.substr(filepath.find_last_of("/\\") + 1);
             std::smatch match;
             if (std::regex_match(filename, match, pattern)) {
