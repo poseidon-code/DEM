@@ -44,6 +44,11 @@ public:
     ~Map() = default;
 
 
+    const DEM<T, little_endian> get_dem() const {
+        return this->dem;
+    }
+
+
     T altitude(float latitude, float longitude) {
         if (!this->dem.bounds.within(latitude, longitude)) {
             if (!this->load(latitude, longitude)) {
