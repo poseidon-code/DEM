@@ -21,7 +21,7 @@ private:
     static T serialize(T value) {
         static union {T value; uint8_t bytes[sizeof(T)];} t{};
         t.value = value;
-        if (little_endian && is_system_little_endian()) {
+        if ((little_endian ^ is_system_little_endian()) == 0) {
             return t.value;
         } else {
             std::reverse(t.bytes, t.bytes + sizeof(t.value));
