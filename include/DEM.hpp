@@ -117,7 +117,7 @@ private:
 
         auto serialize = [is_system_little_endian, &t](T value) -> T {
             t.value = value;
-            if ((little_endian ^ is_system_little_endian()) == 0) {
+            if ((little_endian ^ is_system_little_endian) == 0) {
                 return t.value;
             } else {
                 std::reverse(t.bytes, t.bytes + sizeof(T));
