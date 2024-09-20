@@ -61,7 +61,7 @@ public:
     ~Map() = default;
 
 
-    const DEM<T, little_endian> get_dem() const {
+    const DEM<T, little_endian>& get_dem() const {
         return this->dem;
     }
 
