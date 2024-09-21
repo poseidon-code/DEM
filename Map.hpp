@@ -22,6 +22,7 @@ Email : pritamhalder.portfolio@gmail.com
 
 #pragma once
 
+#include <bit>
 #include <cstdint>
 #include <filesystem>
 #include <map>
@@ -31,10 +32,10 @@ Email : pritamhalder.portfolio@gmail.com
 #include "DEM.hpp"
 
 
-template <dem_datatype T, bool little_endian = true>
+template <dem_datatype T, std::endian endianness = std::endian::native>
 class Map {
 public:
-    using Grid = std::map<Coordinate, std::pair<typename DEM<T, little_endian>::Type, std::string>>;
+    using Grid = std::map<Coordinate, std::pair<typename DEM<T, endianness>::Type, std::string>>;
 
 
     Map(const Grid& grid) {
@@ -54,14 +55,14 @@ public:
         this->grid = grid;
 
         auto first_dem = this->grid.cbegin();
-        this->dem = DEM<T, little_endian>(this->grid[first_dem->first].first, this->grid[first_dem->first].second);
+        this->dem = DEM<T, endianness>(this->grid[first_dem->first].first, this->grid[first_dem->first].second);
     };
 
 
     ~Map() = default;
 
 
-    const DEM<T, little_endian>& get_dem() const {
+    const DEM<T, endianness>& get_dem() const {
         return this->dem;
     }
 
@@ -89,7 +90,7 @@ public:
 
 
     static Grid initialize(std::string dem_directory_path, size_t nrows, size_t ncols, float cellsize, T nodata) {
-        Map<T, little_endian>::Grid grid;
+        Map<T, endianness>::Grid grid;
         std::regex pattern(R"(([-]?\d{1,2}|90)_([-]?\d{1,3}|180)\.bin)");
 
         try {
@@ -106,7 +107,7 @@ public:
                             (latitude >= -90 && latitude <= 90)
                             && (longitude >= -180 && longitude <= 180)
                         ) {
-                            typename DEM<T, little_endian>::Type type(nrows, ncols, latitude, longitude, cellsize, nodata);
+                            typename DEM<T, endianness>::Type type(nrows, ncols, latitude, longitude, cellsize, nodata);
                             grid[{latitude, longitude}] = {type, entry.path().string()};
                         }
                     }
@@ -121,7 +122,7 @@ public:
 
 
 private:
-    DEM<T, little_endian> dem;
+    DEM<T, endianness> dem;
     Grid grid;
 
 
@@ -132,7 +133,7 @@ private:
         };
 
         if (this->grid.count(grid_coordinate) == 0) return false;
-        this->dem = DEM<T, little_endian>(this->grid[grid_coordinate].first, this->grid[grid_coordinate].second);
+        this->dem = DEM<T, endianness>(this->grid[grid_coordinate].first, this->grid[grid_coordinate].second);
 
         return true;
     };

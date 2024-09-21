@@ -22,6 +22,7 @@ Email : pritamhalder.portfolio@gmail.com
 
 #pragma once
 
+#include <bit>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -31,19 +32,13 @@ Email : pritamhalder.portfolio@gmail.com
 #include "DEM.hpp"
 
 
-template <dem_datatype T, bool little_endian = true>
+template <dem_datatype T, std::endian endianness = std::endian::native>
 class Utility {
 private:
-    static constexpr bool is_system_little_endian() {
-        union {int16_t value; uint8_t bytes[sizeof(value)];} x{};
-        x.value = 1;
-        return x.bytes[0] == 1;
-    };
-
     static T serialize(T value) {
         static union {T value; uint8_t bytes[sizeof(T)];} t{};
         t.value = value;
-        if ((little_endian ^ is_system_little_endian()) == 0) {
+        if (((endianness == std::endian::little) ^ (std::endian::native == std::endian::little)) == 0) {
             return t.value;
         } else {
             std::reverse(t.bytes, t.bytes + sizeof(t.value));
@@ -101,7 +96,7 @@ public:
     };
 
 
-    static void create_dem_asc_csv(const std::string& path, const typename DEM<T, little_endian>::Type type) {
+    static void create_dem_asc_csv(const std::string& path, const typename DEM<T, endianness>::Type type) {
         std::vector<T> dem_data;
         T value = 0;
         std::ifstream ifp(path);
@@ -154,7 +149,7 @@ public:
     };
 
 
-    static void create_dem_bin_csv(const std::string& path, const typename DEM<T, little_endian>::Type type) {
+    static void create_dem_bin_csv(const std::string& path, const typename DEM<T, endianness>::Type type) {
         std::vector<T> dem_data;
         T value = 0;
         std::ifstream ifp(path);

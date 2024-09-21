@@ -23,6 +23,7 @@ Email : pritamhalder.portfolio@gmail.com
 #pragma once
 
 #include <algorithm>
+#include <bit>
 #include <cmath>
 #include <concepts>
 #include <cstdint>
@@ -122,7 +123,7 @@ concept dem_datatype =
     !std::is_same_v<T, wchar_t>;
 
 
-template <dem_datatype T, bool little_endian = true>
+template <dem_datatype T, std::endian endianness = std::endian::native>
 class DEM {
 private:
     struct Index {
@@ -132,14 +133,11 @@ private:
 
 
     int16_t read(const std::string& filepath) {
-        union {int16_t value; uint8_t bytes[sizeof(value)];} x{};
-        x.value = 1;
-        bool is_system_little_endian = x.bytes[0] == 1;
         union {T value; uint8_t bytes[sizeof(T)];} t{};
 
-        auto serialize = [is_system_little_endian, &t](T value) -> T {
+        auto serialize = [&t](T value) -> T {
             t.value = value;
-            if ((little_endian ^ is_system_little_endian) == 0) {
+            if constexpr (((endianness == std::endian::little) ^ (std::endian::native == std::endian::little)) == 0) {
                 return t.value;
             } else {
                 std::reverse(t.bytes, t.bytes + sizeof(T));
