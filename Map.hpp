@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <cstdint>
 #include <map>
 #include <regex>
@@ -19,6 +20,7 @@ class Map {
 public:
     using Grid = std::map<Coordinate, std::pair<typename DEM<T, little_endian>::Type, std::string>>;
 
+    Map() = default;
 
     Map(const Grid& grid) {
         if (grid.empty()) {
@@ -44,7 +46,7 @@ public:
     ~Map() = default;
 
 
-    const DEM<T, little_endian> get_dem() const {
+    const DEM<T, little_endian>& get_dem() const {
         return this->dem;
     }
 
@@ -116,7 +118,7 @@ public:
                 float longitude = std::stof(match[2]);
 
                 if (
-                    (latitude >= -90 && latitude <= 90) 
+                    (latitude >= -90 && latitude <= 90)
                     && (longitude >= -180 && longitude <= 180)
                 ) {
                     typename DEM<T, little_endian>::Type type(nrows, ncols, latitude, longitude, cellsize, nodata);

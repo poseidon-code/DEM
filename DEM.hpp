@@ -5,9 +5,9 @@
 #include <cstdint>
 #include <fstream>
 #include <string>
+#include <system_error>
 #include <type_traits>
 #include <vector>
-#include <system_error>
 
 
 
@@ -88,13 +88,13 @@ struct Bounds {
 
 template <typename T>
 using enable_if_dem_datatype = typename std::enable_if_t<
-    std::is_arithmetic_v<T> && 
-    !std::is_same_v<T, bool> && 
-    !std::is_same_v<T, char> && 
-    !std::is_same_v<T, signed char> && 
-    !std::is_same_v<T, unsigned char> && 
-    !std::is_same_v<T, char16_t> && 
-    !std::is_same_v<T, char32_t> && 
+    std::is_arithmetic_v<T> &&
+    !std::is_same_v<T, bool> &&
+    !std::is_same_v<T, char> &&
+    !std::is_same_v<T, signed char> &&
+    !std::is_same_v<T, unsigned char> &&
+    !std::is_same_v<T, char16_t> &&
+    !std::is_same_v<T, char32_t> &&
     !std::is_same_v<T, wchar_t>,
     int
 >;
