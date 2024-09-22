@@ -37,13 +37,14 @@ class Map {
 public:
     using Grid = std::map<Coordinate, std::pair<typename DEM<T, endianness>::Type, std::string>>;
 
+    Map() = default;
 
     Map(const Grid& grid) {
         if (grid.empty()) {
             throw std::runtime_error("map grid is empty\n");
         }
 
-        for (auto m = grid.cbegin(); m != grid.cend(); m++) {
+        for (auto m = grid.cbegin(); m != grid.cend(); ++m) {
             std::string file_path = m->second.second;
 
             if (!std::filesystem::exists(file_path)) {
