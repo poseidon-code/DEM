@@ -20,9 +20,10 @@ using the DEM data of the particular area.
 
     int main() {
         // creates the `*.bin` file at the same directory as that of the `*.asc` file.
-        Utility<int16_t, false>::create_dem_asc_bin("./14_76.asc");
-        // Utility<datatype = int16_t, little_endian = false> : writes 2 byte signed integer values with big-endian (little_endian = FALSE) byte order
-        // (default: little_endian = TRUE, i.e. little-endian byte order)
+        Utility<int16_t, std::endian::big>::create_dem_asc_bin("./14_76.asc");
+        // Utility<datatype = int16_t, endiannnes = std::endian::big> : writes 2 byte signed integer
+        // values with big-endian (endianness = std::endian::big) byte order
+        // (default: endianness = std::endian::native)
 
         return 0;
     }
@@ -45,13 +46,14 @@ using the DEM data of the particular area.
     #include "DEM.hpp"
 
     int main() {
-        // DEM<datatype = int16_t, little_endian = false> : sets up an array of 2 byte signed integer values with big-endian (little_endian = FALSE) byte order,
-        // (default: little_endian = TRUE, i.e. little-endian byte order)
+        // DEM<datatype = int16_t, endiannnes = std::endian::big> : writes 2 byte signed integer
+        // values with big-endian (endianness = std::endian::big) byte order
+        // (default: endianness = std::endian::native)
 
-        DEM<int16_t, false>::Type type = DEM::Type(3600, 3600, 14, 76, 0.000277777, INT16_MIN); // nrows, ncols, yllcorner, xllcorner, cellsize, nodata
+        DEM<int16_t, std::endian::big>::Type type = DEM::Type(3600, 3600, 14, 76, 0.000277777, INT16_MIN); // nrows, ncols, yllcorner, xllcorner, cellsize, nodata
 
         // the byte order of the '*.bin' file should be known
-        DEM<int16_t, false> dem(type, "/home/user/DEM/14_76.bin"); // initialise
+        DEM<int16_t, std::endian::big> dem(type, "/home/user/DEM/14_76.bin"); // initialise
 
         return 0;
     }
@@ -88,24 +90,24 @@ These functions converts files to the following formats and saves them in the sa
 1. **`.asc` to `.bin`** : converts `.asc` _(text)_ file to `.bin` _(binary)_ file
 
     ```cpp
-    Utility<int16_t, false>::create_dem_asc_bin("./14_76.asc");
+    Utility<int16_t, std::endian::big>::create_dem_asc_bin("./14_76.asc");
     ```
 
 2. **`.asc` to `.csv`** : converts `.asc` _(text)_ file to `.csv` _(comma seperated values)_ file
 
     ```cpp
-    Utility<int16_t, false>::create_dem_asc_csv("./14_76.asc", type);
+    Utility<int16_t, std::endian::big>::create_dem_asc_csv("./14_76.asc", type);
     ```
 
 3. **`.bin` to `.csv`** : converts `.bin` _(binary)_ file to `.csv` _(comma seperated values)_ file
 
     ```cpp
-    Utility<int16_t, false>::create_dem_bin_csv("./14_76.bin", type);
+    Utility<int16_t, std::endian::big>::create_dem_bin_csv("./14_76.bin", type);
     ```
 
 4. **`.csv` to `.bin`** : converts `.csv` _(comma seperated values)_ file to `.bin` _(binary)_ file
     ```cpp
-    Utility<int16_t, false>::create_dem_csv_bin("./14_76.csv");
+    Utility<int16_t, std::endian::big>::create_dem_csv_bin("./14_76.csv");
     ```
 
 ## Usage
@@ -115,8 +117,8 @@ These functions converts files to the following formats and saves them in the sa
 #include "DEM.hpp"
 
 int main() {
-    DEM<int16_t, false>::Type type = DEM::Type(3600, 3600, 14, 76, 0.000277777, INT16_MIN); // nrows, ncols, yllcorner, xllcorner, cellsize, nodata
-    DEM<int16_t, false> dem = DEM(type, "/home/user/DEM/14_76.bin"); // initialise
+    DEM<int16_t, std::endian::big>::Type type = DEM::Type(3600, 3600, 14, 76, 0.000277777, INT16_MIN); // nrows, ncols, yllcorner, xllcorner, cellsize, nodata
+    DEM<int16_t, std::endian::big> dem = DEM(type, "/home/user/DEM/14_76.bin"); // initialise
 
     return 0;
 }
@@ -133,30 +135,31 @@ when accessing a coordinate which is not bounded by the currently loaded DEM dat
     #include "Map.hpp"
 
     int main() {
-        // Map<datatype = int16_t, little_endian = false> : sets up DEM of 2 byte signed integer values with big-endian (little_endian = FALSE) byte order,
-        // (default: little_endian = TRUE, i.e. little-endian byte order)
+        // Map<datatype = int16_t, endiannnes = std::endian::big> : writes 2 byte signed integer
+        // values with big-endian (endianness = std::endian::big) byte order
+        // (default: endianness = std::endian::native)
 
-        Map<int16_t, false>::Grid grid;
+        Map<int16_t, std::endian::big>::Grid grid;
         grid[{14, 76}] = {{3600, 3600, 14, 76, 0.000277777, INT16_MIN}, "/home/user/DEM/14_76.bin"};
         grid[{14, 77}] = {{3600, 3600, 14, 77, 0.000277777, INT16_MIN}, "/home/user/DEM/14_77.bin"};
         grid[{14, 78}] = {{3600, 3600, 14, 78, 0.000277777, INT16_MIN}, "/home/user/DEM/14_77.bin"};
 
-        Map<int16_t, false> map(grid); // initialise
+        Map<int16_t, std::endian::big> map(grid); // initialise
 
         return 0;
     }
     ```
 
     **OR**, dynamically create grid from DEM files in a directory \
-    _(**NOTE** : all the DEM files in the directory must conform to `<latitude>_<longitude>.bin` file name and must have same properties (`nrows`, `ncols`, `cellsize`, `nodata`))\_
+    _(**NOTE** : all the DEM files in the directory must conform to `<latitude>_<longitude>.bin` file name and must have same properties (`nrows`, `ncols`, `cellsize`, `nodata`))_
 
     ```cpp
     #include "Map.hpp"
 
     int main() {
-        Map<int16_t, false>::Grid grid = Map<int16_t, true>::initialize("/home/user/DEM/", 3600, 3600, 0.00027777, INT16_MIN); // `/` (`\\` in Windows) required at end of the directory path
+        Map<int16_t, std::endian::big>::Grid grid = Map<int16_t, true>::initialize("/home/user/DEM/", 3600, 3600, 0.00027777, INT16_MIN); // `/` (`\\` in Windows) required at end of the directory path
 
-        Map<int16_t, false> map(grid); // initialise
+        Map<int16_t, std::endian::big> map(grid); // initialise
 
         return 0;
     }
