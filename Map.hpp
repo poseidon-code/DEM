@@ -3,17 +3,17 @@ MIT License
 
 Copyright (c) 2023 Pritam Halder
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
-documentation files (the "Software"), to deal in the Software without restriction, including without 
-limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the 
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the Software without restriction, including without
+limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
 Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
-TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
-THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
 Author : Pritam Halder
@@ -35,7 +35,7 @@ Email : pritamhalder.portfolio@gmail.com
 template <dem_datatype T, std::endian endianness = std::endian::native>
 class Map {
 public:
-    using Grid = std::map<Coordinate, std::pair<typename DEM<T, endianness>::Type, std::string>>;
+    using Grid = std::map<Coordinate, std::pair<typename DEM<T, endianness>::Type, std::filesystem::path>>;
 
     Map() = default;
 
@@ -45,10 +45,10 @@ public:
         }
 
         for (auto m = grid.cbegin(); m != grid.cend(); ++m) {
-            std::string file_path = m->second.second;
+            std::filesystem::path filepath = m->second.second;
 
-            if (!std::filesystem::exists(file_path)) {
-                std::string e = "'" + file_path + "' file doesn't exists\n";
+            if (!std::filesystem::exists(filepath)) {
+                std::string e = "'" + filepath.string() + "' file doesn't exists\n";
                 throw std::runtime_error(e);
             }
         }
@@ -90,7 +90,7 @@ public:
     };
 
 
-    static Grid initialize(std::string dem_directory_path, size_t nrows, size_t ncols, float cellsize, T nodata) {
+    static Grid initialize(const std::filesystem::path& dem_directory_path, size_t nrows, size_t ncols, float cellsize, T nodata) {
         Map<T, endianness>::Grid grid;
         std::regex pattern(R"(([-]?\d{1,2}|90)_([-]?\d{1,3}|180)\.bin)");
 

@@ -106,6 +106,7 @@ These functions converts files to the following formats and saves them in the sa
     ```
 
 4. **`.csv` to `.bin`** : converts `.csv` _(comma seperated values)_ file to `.bin` _(binary)_ file
+
     ```cpp
     Utility<int16_t, std::endian::big>::create_dem_csv_bin("./14_76.csv");
     ```
@@ -151,7 +152,7 @@ when accessing a coordinate which is not bounded by the currently loaded DEM dat
     ```
 
     **OR**, dynamically create grid from DEM files in a directory \
-    _(**NOTE** : all the DEM files in the directory must conform to `<latitude>_<longitude>.bin` file name and must have same properties (`nrows`, `ncols`, `cellsize`, `nodata`))_
+    _(**NOTE** : all the DEM files in the directory must conform to `<latitude>_<longitude>.bin` file name and must have same properties (`nrows`, `ncols`, `cellsize`, `nodata`))\_
 
     ```cpp
     #include "Map.hpp"
