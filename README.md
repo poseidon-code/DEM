@@ -40,7 +40,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC DEM) # links DEM
 3. The text based DEM data should be converted to binary file by using the library.
 
     ```cpp
-    #inculde "Utility.hpp"
+    #inculde "DEM/Utility.hpp"
 
     int main() {
         // creates the `*.bin` file at the same directory as that of the `*.asc` file.
@@ -67,7 +67,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC DEM) # links DEM
 2. File path to the created DEM data binary file _(e.g. `"/home/user/DEM/14_76.bin"`)_
 
     ```cpp
-    #include "DEM.hpp"
+    #include "DEM/DEM.hpp"
 
     int main() {
         // DEM<datatype = int16_t, endiannnes = std::endian::big> : writes 2 byte signed integer
@@ -139,7 +139,7 @@ These functions converts files to the following formats and saves them in the sa
 
 ```cpp
 // main.cpp
-#include "DEM.hpp"
+#include "DEM/DEM.hpp"
 
 int main() {
     DEM<int16_t, std::endian::big>::Type type = DEM::Type(3600, 3600, 14, 76, 0.000277777, INT16_MIN); // nrows, ncols, yllcorner, xllcorner, cellsize, nodata
@@ -157,7 +157,7 @@ when accessing a coordinate which is not bounded by the currently loaded DEM dat
 1. Create a mapping of DEM files to coordinates.
 
     ```cpp
-    #include "Map.hpp"
+    #include "DEM/Map.hpp"
 
     int main() {
         // Map<datatype = int16_t, endiannnes = std::endian::big> : writes 2 byte signed integer
@@ -179,7 +179,7 @@ when accessing a coordinate which is not bounded by the currently loaded DEM dat
     _(**NOTE** : all the DEM files in the directory must conform to `<latitude>_<longitude>.bin` file name and must have same properties (`nrows`, `ncols`, `cellsize`, `nodata`))\_
 
     ```cpp
-    #include "Map.hpp"
+    #include "DEM/Map.hpp"
 
     int main() {
         Map<int16_t, std::endian::big>::Grid grid = Map<int16_t, true>::initialize("/home/user/DEM/", 3600, 3600, 0.00027777, INT16_MIN); // `/` (`\\` in Windows) required at end of the directory path
