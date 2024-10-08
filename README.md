@@ -3,6 +3,30 @@
 A simple library for accessing elevation values from provided latitude & longitude
 using the DEM data of the particular area.
 
+## Project Setup (CMake)
+
+**Prerequisites**
+
+1. CMake _(version 3.25 or above)_
+2. C++ compiler with support for C++ 20 standard (or above)
+
+```cmake
+# CMakeLists.txt (at the root of your project)
+
+cmake_minimum_required(VERSION 3.25)
+project(Test LANGUAGES C CXX)
+
+set(CMAKE_CXX_STANDARD 20) # C++ standard 20 or above
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# including the downloaded DEM library (<project_root>/external/DEM)
+add_subdirectory(external/DEM)
+
+add_executable(${PROJECT_NAME} main.cpp)
+target_include_directories(${PROJECT_NAME} PUBLIC ${LIBDEM_INCLUDE_DIRECTORIES}) # include DEM headers
+target_link_libraries(${PROJECT_NAME} PUBLIC DEM) # links DEM
+```
+
 ## Setting up DEM data
 
 1. DEM data of the particular area should be available in any supported standard format.
