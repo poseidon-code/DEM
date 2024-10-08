@@ -3,6 +3,30 @@
 A simple library for accessing elevation values from provided latitude & longitude
 using the DEM data of the particular area.
 
+## Project Setup (CMake)
+
+**Prerequisites**
+
+1. CMake _(version 3.25 or above)_
+2. C++ compiler with support for C++ 17 standard (or above)
+
+```cmake
+# CMakeLists.txt (at the root of your project)
+
+cmake_minimum_required(VERSION 3.25)
+project(Test LANGUAGES C CXX)
+
+set(CMAKE_CXX_STANDARD 17) # C++ standard 20 or above
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# including the downloaded DEM library (<project_root>/external/DEM)
+add_subdirectory(external/DEM)
+
+add_executable(${PROJECT_NAME} main.cpp)
+target_include_directories(${PROJECT_NAME} PUBLIC ${LIBDEM_INCLUDE_DIRECTORIES}) # include DEM headers
+target_link_libraries(${PROJECT_NAME} PUBLIC DEM) # links DEM
+```
+
 ## Setting up DEM data
 
 1. DEM data of the particular area should be available in any supported standard format.
@@ -16,7 +40,7 @@ using the DEM data of the particular area.
 3. The text based DEM data should be converted to binary file by using the library.
 
     ```cpp
-    #inculde "Utility.hpp"
+    #inculde "DEM/Utility.hpp"
 
     int main() {
         // creates the `*.bin` file at the same directory as that of the `*.asc` file.
@@ -42,7 +66,7 @@ using the DEM data of the particular area.
 2. File path to the created DEM data binary file _(e.g. `"/home/user/DEM/14_76.bin"`)_
 
     ```cpp
-    #include "DEM.hpp"
+    #include "DEM/DEM.hpp"
 
     int main() {
         // DEM<datatype = int16_t, little_endian = false> : sets up an array of 2 byte signed integer values with big-endian (little_endian = FALSE) byte order,
@@ -112,7 +136,7 @@ These functions converts files to the following formats and saves them in the sa
 
 ```cpp
 // main.cpp
-#include "DEM.hpp"
+#include "DEM/DEM.hpp"
 
 int main() {
     DEM<int16_t, false>::Type type = DEM::Type(3600, 3600, 14, 76, 0.000277777, INT16_MIN); // nrows, ncols, yllcorner, xllcorner, cellsize, nodata
@@ -130,7 +154,7 @@ when accessing a coordinate which is not bounded by the currently loaded DEM dat
 1. Create a mapping of DEM files to coordinates.
 
     ```cpp
-    #include "Map.hpp"
+    #include "DEM/Map.hpp"
 
     int main() {
         // Map<datatype = int16_t, little_endian = false> : sets up DEM of 2 byte signed integer values with big-endian (little_endian = FALSE) byte order,
@@ -151,7 +175,7 @@ when accessing a coordinate which is not bounded by the currently loaded DEM dat
     _(**NOTE** : all the DEM files in the directory must conform to `<latitude>_<longitude>.bin` file name and must have same properties (`nrows`, `ncols`, `cellsize`, `nodata`))\_
 
     ```cpp
-    #include "Map.hpp"
+    #include "DEM/Map.hpp"
 
     int main() {
         Map<int16_t, false>::Grid grid = Map<int16_t, true>::initialize("/home/user/DEM/", 3600, 3600, 0.00027777, INT16_MIN); // `/` (`\\` in Windows) required at end of the directory path
