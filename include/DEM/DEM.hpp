@@ -30,9 +30,9 @@ Email : pritamhalder.portfolio@gmail.com
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <system_error>
 #include <type_traits>
 #include <vector>
-#include <system_error>
 
 
 
@@ -111,6 +111,24 @@ struct Bounds {
 };
 
 
+
+
+template <typename T>
+class GridView2D {
+private:
+    T* data;
+    size_t rows;
+    size_t columns;
+
+public:
+    GridView2D() : this->data(nullptr), this->rows(0), this->columns(0) {}
+    GridView2D(T* data, size_t rows, size_t cols) : this->data(data), this->rows(rows), this->columns(cols) {}
+    T& operator()(size_t r, size_t c) { return this->data[r * this->columns + c]; }
+    const T& operator()(size_t r, size_t c) const { return this->data[r * this->columns + c]; }
+};
+
+
+
 template <typename T>
 concept dem_datatype =
     std::is_arithmetic_v<T> &&
@@ -123,7 +141,8 @@ concept dem_datatype =
     !std::is_same_v<T, wchar_t>;
 
 
-template <dem_datatype T, std::endian endianness = std::endian::native>
+
+template <dem_datatype T, std::endian E = std::endian::native>
 class DEM {
 private:
     struct Index {
@@ -131,45 +150,55 @@ private:
         float column;
     };
 
+    std::vector<std::byte> raw_bytes;
+    std::vector<T> buffer;
+    GridView2D<T> grid{nullptr, 0, 0};
 
-    int16_t read(const std::filesystem::path& filepath) {
-        union {T value; uint8_t bytes[sizeof(T)];} t{};
 
-        auto serialize = [&t](T value) -> T {
-            t.value = value;
-            if constexpr (((endianness == std::endian::little) ^ (std::endian::native == std::endian::little)) == 0) {
-                return t.value;
-            } else {
-                std::reverse(t.bytes, t.bytes + sizeof(T));
-                return t.value;
-            }
-        };
+    void read(const std::filesystem::path& filepath) {
+        const size_t elem_count = this->type.nrows * this->type.ncols;
+        const size_t byte_count = elem_count * sizeof(T);
 
-        std::ifstream fp(filepath, std::ios::binary);
-        T t_value = 0;
-
-        if (fp.good() && !fp.eof()) {
-            size_t column_count = 0;
-            std::vector<T> row_data;
-
-            while (fp.read(reinterpret_cast<char*>(&t_value), sizeof(T))) {
-                row_data.push_back(serialize(t_value));
-                column_count++;
-
-                if (column_count == this->type.ncols) {
-                    this->data.push_back(row_data);
-                    column_count = 0;
-                    row_data.clear();
-                }
-            }
-        } else {
-            fp.close();
-            return EXIT_FAILURE;
+        std::ifstream fp(filepath, std::ios::binary | std::ios::ate);
+        if (!fp) {
+            throw std::runtime_error("failed to open DEM file");
         }
 
+        const std::streamsize file_size = fp.tellg();
+        if (file_size != static_cast<std::streamsize>(byte_count)) {
+            throw std::runtime_error("DEM file size does not match expected dimensions");
+        }
+
+        fp.seekg(0, std::ios::beg);
+        this->raw_bytes.resize(byte_count);
+        if (!fp.read(reinterpret_cast<char*>(raw_bytes.data()), file_size)) {
+            throw std::runtime_error("failed to read DEM file");
+        }
         fp.close();
-        return EXIT_SUCCESS;
-    };
+
+
+        this->buffer.resize(elem_count);
+        if constexpr (E == std::endian::native) {
+            std::copy(this->raw_bytes.begin(), this->raw_bytes.end(), reinterpret_cast<std::byte*>(this->buffer.data()));
+        } else {
+            T t_value = 0;
+
+            for (size_t i = 0; i < elem_count; ++i) {
+                std::copy(
+                    this->raw_bytes.begin() + i * sizeof(T),
+                    this->raw_bytes.begin() + (i + 1) * sizeof(T),
+                    reinterpret_cast<std::byte*>(&t_value)
+                );
+
+                auto* b = reinterpret_cast<std::byte*>(&t_value);
+                std::reverse(b, b + sizeof(T));
+
+                this->buffer[i] = t_value;
+            }
+        }
+
+        this->grid = GridView2D<T>(this->buffer.data(), this->type.nrows, this->type.ncols);
+    }
 
 
     Index index(float latitude, float longitude) {
@@ -230,11 +259,11 @@ public:
             xllcorner(xllcorner),
             cellsize(cellsize),
             nodata(nodata)
-         {
+        {
             if (nrows == 0 || ncols == 0) {
                 throw std::runtime_error("invalid data dimensions, nrows = 0 & ncols = 0");
             }
-            if (yllcorner > 90 || yllcorner < -90 || xllcorner > 180 || xllcorner < -180) {
+            if (yllcorner > 89 || yllcorner < -90 || xllcorner > 179 || xllcorner < -180) {
                 std::string e = "invalid coordinates (" + std::to_string(yllcorner) +  ":" +  std::to_string(xllcorner) + ")";
                 throw std::runtime_error(e);
             }
@@ -248,7 +277,6 @@ public:
     };
 
 
-    std::vector<std::vector<T>> data;
     Type type;
     Bounds bounds;
 
@@ -270,11 +298,7 @@ public:
             throw std::runtime_error(e);
         }
 
-        // read the DEM file (sets: this->data)
-        if (this->read(filepath) != EXIT_SUCCESS) {
-            std::string e = "failed to read DEM data from '" + filepath.string() + "'";
-            throw std::runtime_error(e);
-        }
+        this->read(filepath);
     };
 
 
@@ -286,44 +310,44 @@ public:
 
 
     T altitude(float latitude, float longitude) {
-        Index rc = this->index(latitude, longitude);
+        auto [row, column] = this->index(latitude, longitude);
 
-        if (rc.row == this->type.nodata || rc.column == this->type.nodata) {
+        if (row == this->type.nodata || column == this->type.nodata) {
             return this->type.nodata;
         }
 
-        size_t r = static_cast<size_t>(std::round(rc.row));
-        size_t c = static_cast<size_t>(std::round(rc.column));
+        size_t r = static_cast<size_t>(std::round(row));
+        size_t c = static_cast<size_t>(std::round(column));
 
         r = r == this->type.nrows ? r - 1 : r;
         c = c == this->type.ncols ? c - 1 : c;
 
-        T altitude = this->data[r][c];
+        T altitude = this->grid(r, c);
 
         return altitude;
     };
 
 
     float interpolated_altitude(float latitude, float longitude) {
-        Index rc = this->index(latitude, longitude);
+        auto [row, column] = this->index(latitude, longitude);
 
-        if (rc.row == this->type.nodata || rc.column == this->type.nodata) {
+        if (row == this->type.nodata || column == this->type.nodata) {
             return this->type.nodata;
         }
 
-        size_t r = static_cast<size_t>(rc.row);
-        size_t c = static_cast<size_t>(rc.column);
+        size_t r = static_cast<size_t>(row);
+        size_t c = static_cast<size_t>(column);
 
-        float del_latitude = std::min(rc.row, static_cast<float>(this->type.nrows-1)) - r;
-        float del_longitude = std::min(rc.column, static_cast<float>(this->type.ncols-1)) - c;
+        float del_latitude = std::min(row, static_cast<float>(this->type.nrows - 1)) - r;
+        float del_longitude = std::min(column, static_cast<float>(this->type.ncols - 1)) - c;
 
-        size_t next_r = (r == this->type.nrows-1) ? r : r + 1;
-        size_t next_c = (c == this->type.ncols-1) ? c : c + 1;
+        size_t next_r = (r == this->type.nrows - 1) ? r : r + 1;
+        size_t next_c = (c == this->type.ncols - 1) ? c : c + 1;
 
-        float altitude =   (1-del_latitude) * (1-del_longitude) * this->data[r][c] +
-                            del_longitude * (1-del_latitude) * this->data[r][next_c] +
-                            (1-del_longitude) * del_latitude * this->data[next_r][c] +
-                            del_latitude * del_longitude * this->data[next_r][next_c];
+        float altitude =    (1 - del_latitude) * (1 - del_longitude) * this->grid(r, c) +
+                            del_longitude * (1 - del_latitude) * this->grid(r, next_c) +
+                            (1 - del_longitude) * del_latitude * this->grid(next_r, c) +
+                            del_latitude * del_longitude * this->grid(next_r, next_c);
 
         return altitude;
     };
